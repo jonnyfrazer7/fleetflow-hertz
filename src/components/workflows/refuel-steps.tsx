@@ -501,14 +501,14 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
                     {renderStepInput(step, index)}
                     
                     <div className="flex gap-3">
-                      <Button 
-                        onClick={() => handleCompleteStep(index)}
-                        disabled={!canComplete}
-                        className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Complete Step
-                      </Button>
+                        <Button 
+                          onClick={() => handleCompleteStep(index)}
+                          disabled={!canComplete}
+                          className="bg-workflow-step-completed hover:bg-workflow-step-completed/80 disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Complete Step
+                        </Button>
                     </div>
                   </div>
                 </CardContent>

@@ -37,6 +37,33 @@ All colors MUST be HSL.
     --status-pending: 38 92% 50%;
     --status-warning: 25 95% 53%;
     --status-error: 0 84% 60%;
+    
+    /* Workflow UI Colors */
+    --workflow-step-completed: 142 76% 36%;
+    --workflow-step-completed-bg: 142 76% 95%;
+    --workflow-step-active: 142 76% 36%;
+    --workflow-step-progress: 221 83% 53%;
+    --workflow-step-progress-bg: 221 83% 95%;
+    
+    /* Info Panels */
+    --info-bg: 200 100% 95%;
+    --info-text: 200 100% 25%;
+    --info-border: 200 100% 85%;
+    
+    /* Success Panels */
+    --success-bg: 142 76% 95%;
+    --success-text: 142 76% 25%;
+    --success-border: 142 76% 85%;
+    
+    /* Warning Panels */
+    --warning-bg: 45 100% 95%;
+    --warning-text: 45 100% 25%;
+    --warning-border: 45 100% 85%;
+    
+    /* Priority Colors */
+    --priority-high: 0 84% 60%;
+    --priority-medium: 45 100% 51%;
+    --priority-low: 142 76% 36%;
 
     /* Dashboard Background */
     --dashboard-bg: 210 20% 98%;

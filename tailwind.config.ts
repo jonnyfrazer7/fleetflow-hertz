@@ -37,6 +37,33 @@ export default {
         "status-warning": "hsl(var(--status-warning))",
         "status-error": "hsl(var(--status-error))",
         
+        // Workflow UI Colors
+        "workflow-step-completed": "hsl(var(--workflow-step-completed))",
+        "workflow-step-completed-bg": "hsl(var(--workflow-step-completed-bg))",
+        "workflow-step-active": "hsl(var(--workflow-step-active))",
+        "workflow-step-progress": "hsl(var(--workflow-step-progress))",
+        "workflow-step-progress-bg": "hsl(var(--workflow-step-progress-bg))",
+        
+        // Info Panels
+        "info-bg": "hsl(var(--info-bg))",
+        "info-text": "hsl(var(--info-text))",
+        "info-border": "hsl(var(--info-border))",
+        
+        // Success Panels
+        "success-bg": "hsl(var(--success-bg))",
+        "success-text": "hsl(var(--success-text))",
+        "success-border": "hsl(var(--success-border))",
+        
+        // Warning Panels
+        "warning-bg": "hsl(var(--warning-bg))",
+        "warning-text": "hsl(var(--warning-text))",
+        "warning-border": "hsl(var(--warning-border))",
+        
+        // Priority Colors
+        "priority-high": "hsl(var(--priority-high))",
+        "priority-medium": "hsl(var(--priority-medium))",
+        "priority-low": "hsl(var(--priority-low))",
+        
         // Dashboard
         "dashboard-bg": "hsl(var(--dashboard-bg))",
         

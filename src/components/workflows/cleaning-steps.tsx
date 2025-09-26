@@ -140,7 +140,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-600">
+          <CardTitle className="flex items-center gap-2 text-workflow-step-completed">
             <CheckCircle className="w-6 h-6" />
             Cleaning Complete!
           </CardTitle>
@@ -171,12 +171,12 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
             {(vehicle.fuelType === 'EV' || vehicle.fuelType === 'HYBRID') && (
               <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
                 <CardContent className="p-6 text-center">
-                  <Fuel className="w-8 h-8 mx-auto mb-3 text-blue-500" />
+                  <Fuel className="w-8 h-8 mx-auto mb-3 text-workflow-step-progress" />
                   <h3 className="font-semibold mb-2">Needs Charging</h3>
                   <p className="text-sm text-muted-foreground">
                     {vehicle.fuelType} vehicle needs charging before becoming rentable
                   </p>
-                  <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600">
+                  <Button className="mt-4 w-full bg-workflow-step-progress hover:bg-workflow-step-progress/80">
                     Send to Charging Queue
                   </Button>
                 </CardContent>
@@ -208,7 +208,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-500" />
+              <Sparkles className="w-5 h-5 text-workflow-step-progress" />
               Vehicle Cleaning Workflow
             </CardTitle>
             <Badge variant="outline" className="text-sm">
@@ -244,7 +244,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
           return (
             <Card key={step.id} className={`
               ${isActive ? 'ring-2 ring-hertz-yellow' : ''}
-              ${isCompleted ? 'bg-green-50' : ''}
+              ${isCompleted ? 'bg-workflow-step-completed-bg' : ''}
               transition-all
             `}>
               <CardHeader>
@@ -252,7 +252,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
                   <div className="flex items-center gap-3">
                     <div className={`
                       w-10 h-10 rounded-full flex items-center justify-center
-                      ${isCompleted ? 'bg-green-500 text-white' : 
+                      ${isCompleted ? 'bg-workflow-step-completed text-white' : 
                         isActive ? 'bg-hertz-yellow text-hertz-navy' : 
                         'bg-gray-200 text-gray-400'}
                     `}>
@@ -271,7 +271,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
                     </div>
                     
                     {isCompleted ? (
-                      <Badge className="bg-green-500">Completed</Badge>
+                      <Badge className="bg-workflow-step-completed text-white">Completed</Badge>
                     ) : isActive && !isProcessingStep ? (
                       <Button 
                         size="sm"
@@ -281,7 +281,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
                         Start Step
                       </Button>
                     ) : isActive && isProcessingStep ? (
-                      <Badge variant="outline" className="text-blue-600 border-blue-600">
+                      <Badge variant="outline" className="text-workflow-step-progress border-workflow-step-progress">
                         In Progress
                       </Badge>
                     ) : null}
@@ -307,7 +307,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
                     <div className="flex gap-3">
                       <Button 
                         onClick={() => handleCompleteStep(index)}
-                        className="bg-green-500 hover:bg-green-600"
+                        className="bg-workflow-step-completed hover:bg-workflow-step-completed/80"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Complete Step

@@ -28,20 +28,20 @@ export function KeyHandlingWorkOrderTable({ workflows, vehicles }: KeyHandlingWo
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-500 text-white';
-      case 'HIGH': return 'bg-orange-500 text-white';
-      case 'MEDIUM': return 'bg-yellow-500 text-black';
-      case 'LOW': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'URGENT': return 'bg-destructive text-white';
+      case 'HIGH': return 'bg-priority-high text-white';
+      case 'MEDIUM': return 'bg-priority-medium text-black';
+      case 'LOW': return 'bg-priority-low text-white';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-gray-100 text-gray-800 border-gray-300';
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'COMPLETED': return 'bg-green-100 text-green-800 border-green-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'PENDING': return 'bg-status-pending/10 text-status-pending border-status-pending/20';
+      case 'IN_PROGRESS': return 'bg-status-progress/10 text-status-progress border-status-progress/20';
+      case 'COMPLETED': return 'bg-status-completed/10 text-status-completed border-status-completed/20';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -50,7 +50,7 @@ export function KeyHandlingWorkOrderTable({ workflows, vehicles }: KeyHandlingWo
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Key className="w-5 h-5 text-green-500" />
+            <Key className="w-5 h-5 text-workflow-step-active" />
             Key Handling Work Orders
           </CardTitle>
         </CardHeader>
@@ -71,7 +71,7 @@ export function KeyHandlingWorkOrderTable({ workflows, vehicles }: KeyHandlingWo
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Key className="w-5 h-5 text-green-500" />
+          <Key className="w-5 h-5 text-workflow-step-active" />
           Key Handling Work Orders
         </CardTitle>
       </CardHeader>
@@ -144,7 +144,7 @@ export function KeyHandlingWorkOrderTable({ workflows, vehicles }: KeyHandlingWo
                     <div className="flex items-center gap-2">
                       {workflow.status === 'PENDING' && (
                         <Link to={`/workflows/key_handling/execute/${workflow.id}`}>
-                          <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                          <Button size="sm" className="bg-workflow-step-active hover:bg-workflow-step-active/80">
                             <Play className="w-4 h-4 mr-1" />
                             Start
                           </Button>
@@ -161,7 +161,7 @@ export function KeyHandlingWorkOrderTable({ workflows, vehicles }: KeyHandlingWo
                       )}
                       
                       {workflow.status === 'COMPLETED' && (
-                        <Badge className="bg-green-500 text-white">
+                        <Badge className="bg-workflow-step-completed text-white">
                           Completed
                         </Badge>
                       )}

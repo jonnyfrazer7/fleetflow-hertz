@@ -189,8 +189,8 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
               />
             </div>
             
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+            <div className="p-4 bg-info-bg rounded-lg">
+              <p className="text-sm text-info-text">
                 <Lock className="w-4 h-4 inline mr-1" />
                 Ensure keys are securely locked in the designated key box
               </p>
@@ -201,12 +201,12 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
       case 'availability-confirmation':
         return (
           <div className="space-y-4">
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-800 mb-2">
+            <div className="p-4 bg-success-bg rounded-lg">
+              <p className="text-sm text-success-text mb-2">
                 <CheckCircle className="w-4 h-4 inline mr-1" />
                 Turnaround Process Complete!
               </p>
-              <ul className="text-xs text-green-700 space-y-1">
+              <ul className="text-xs text-success-text space-y-1">
                 <li>• Vehicle has been cleaned</li>
                 <li>• Fuel tank is full / EV is charged</li>
                 <li>• Keys stored in box #{keyHandlingData.keyBoxNumber}</li>
@@ -214,12 +214,12 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
               </ul>
             </div>
             
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <p className="text-sm text-yellow-800 mb-2">
+            <div className="p-4 bg-warning-bg rounded-lg">
+              <p className="text-sm text-warning-text mb-2">
                 <Car className="w-4 h-4 inline mr-1" />
                 Mark this vehicle as available for rent?
               </p>
-              <p className="text-xs text-yellow-700">This will make the vehicle bookable by customers.</p>
+              <p className="text-xs text-warning-text">This will make the vehicle bookable by customers.</p>
             </div>
           </div>
         );
@@ -254,7 +254,7 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Key className="w-5 h-5 text-green-500" />
+              <Key className="w-5 h-5 text-workflow-step-completed" />
               Key Handling Workflow
             </CardTitle>
             <Badge variant="outline" className="text-sm">
@@ -292,8 +292,8 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
                   <div className="flex items-center gap-3">
                     <div className={`
                       w-10 h-10 rounded-full flex items-center justify-center
-                      ${isCompleted ? 'bg-green-500 text-white' : 
-                        isActive ? 'bg-green-500 text-white' : 
+                      ${isCompleted ? 'bg-workflow-step-completed text-white' : 
+                        isActive ? 'bg-workflow-step-active text-white' : 
                         'bg-gray-200 text-gray-400'}
                     `}>
                       {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
@@ -311,17 +311,17 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
                     </div>
                     
                     {isCompleted ? (
-                      <Badge className="bg-green-500">Completed</Badge>
+                      <Badge className="bg-workflow-step-completed text-white">Completed</Badge>
                     ) : isActive && !isProcessingStep ? (
                       <Button 
                         size="sm"
                         onClick={() => handleStartStep(index)}
-                        className="bg-green-500 hover:bg-green-600"
+                        className="bg-workflow-step-active hover:bg-workflow-step-active/80"
                       >
                         Start Step
                       </Button>
                     ) : isActive && isProcessingStep ? (
-                      <Badge variant="outline" className="text-green-600 border-green-600">
+                      <Badge variant="outline" className="text-workflow-step-progress border-workflow-step-progress">
                         In Progress
                       </Badge>
                     ) : null}
@@ -339,7 +339,7 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
                       {step.id === 'availability-confirmation' ? (
                         <Button 
                           onClick={handleAvailabilityConfirmation}
-                          className="bg-green-500 hover:bg-green-600"
+                          className="bg-workflow-step-completed hover:bg-workflow-step-completed/80"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Yes, Mark Available for Rent
@@ -348,7 +348,7 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
                         <Button 
                           onClick={() => handleCompleteStep(index)}
                           disabled={!canComplete}
-                          className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
+                          className="bg-workflow-step-completed hover:bg-workflow-step-completed/80 disabled:opacity-50"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Complete Step
