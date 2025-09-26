@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Vehicle } from '@/types/fleet';
 import { useFuelLocations } from '@/hooks/use-locations';
-import { useCurrentUser } from '@/hooks/use-workforce-users';
+import { useCurrentUser, useWorkforceUsers } from '@/hooks/use-workforce-users';
 import { 
   MapPin, 
   FileText, 
@@ -51,7 +51,8 @@ interface RefuelData {
   fuelingType: 'internal' | 'external' | '';
   tripTicketId: string;
   selectedLocationId: string;
-  driverAssigned: string;
+  assignedUserId: string;
+  assignedUserName: string;
   fuelAmount: string;
   fuelCost: string;
   receiptUploaded: boolean;
@@ -70,19 +71,10 @@ const initialSteps: RefuelStep[] = [
   },
   {
     id: 'trip-ticket',
-    title: 'Trip Ticket Handling',
-    description: 'Create trip ticket for external fueling',
+    title: 'Trip Ticket & User Assignment',
+    description: 'Create trip ticket, assign user, and select location',
     icon: FileText,
-    estimatedTime: 5,
-    completed: false,
-    requiresInput: true
-  },
-  {
-    id: 'move-to-location',
-    title: 'Move to Fueling Location',
-    description: 'Assign driver and move vehicle to fuel station',
-    icon: MapPin,
-    estimatedTime: 10,
+    estimatedTime: 8,
     completed: false,
     requiresInput: true
   },
@@ -103,6 +95,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
   const [isProcessingStep, setIsProcessingStep] = useState(false);
   const { data: fuelLocations = [] } = useFuelLocations();
   const { data: currentUser } = useCurrentUser();
+  const { data: workforceUsers = [] } = useWorkforceUsers();
   
   const [refuelData, setRefuelData] = useState<RefuelData>({
     currentMileage: '',
@@ -110,22 +103,24 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     fuelingType: '',
     tripTicketId: '',
     selectedLocationId: '',
-    driverAssigned: '',
+    assignedUserId: '',
+    assignedUserName: '',
     fuelAmount: '',
     fuelCost: '',
     receiptUploaded: false,
     returnLocation: ''
   });
 
-  // Auto-populate driver with current user when available
+  // Auto-populate with current user when available
   React.useEffect(() => {
-    if (currentUser && !refuelData.driverAssigned) {
+    if (currentUser && !refuelData.assignedUserId) {
       setRefuelData(prev => ({
         ...prev,
-        driverAssigned: currentUser.name
+        assignedUserId: currentUser.id,
+        assignedUserName: currentUser.name
       }));
     }
-  }, [currentUser, refuelData.driverAssigned]);
+  }, [currentUser, refuelData.assignedUserId]);
 
   const completedSteps = steps.filter(step => step.completed).length;
   const totalSteps = steps.length;
@@ -159,11 +154,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
 
     // Handle workflow branching based on fueling type
     if (step.id === 'refuel-request' && refuelData.fuelingType === 'internal') {
-      // Skip trip ticket for internal fueling, go directly to move-to-location
-      const nextStepIndex = steps.findIndex(s => s.id === 'move-to-location');
-      setCurrentStep(nextStepIndex);
-    } else if (step.id === 'move-to-location' && refuelData.fuelingType === 'internal') {
-      // Skip to fueling-complete for internal fueling
+      // Skip trip ticket for internal fueling, go directly to fueling-complete
       const nextStepIndex = steps.findIndex(s => s.id === 'fueling-complete');
       setCurrentStep(nextStepIndex);
     } else if (stepIndex < totalSteps - 1) {
@@ -230,6 +221,32 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
         return (
           <div className="space-y-4">
             <div>
+              <Label htmlFor="assignedUser">Assign User</Label>
+              <Select 
+                value={refuelData.assignedUserId} 
+                onValueChange={(value) => {
+                  const user = workforceUsers.find(u => u.id === value);
+                  updateRefuelData('assignedUserId', value);
+                  updateRefuelData('assignedUserName', user?.name || '');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user to assign" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  {workforceUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      <div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-xs text-muted-foreground">{user.role} • {user.phone}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
               <Label htmlFor="tripTicketId">Trip Ticket ID</Label>
               <Input
                 id="tripTicketId"
@@ -257,109 +274,45 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        );
-
-      case 'move-to-location':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="driverAssigned">Driver Assigned</Label>
-              <Input
-                id="driverAssigned"
-                placeholder="Driver name"
-                value={refuelData.driverAssigned}
-                onChange={(e) => updateRefuelData('driverAssigned', e.target.value)}
-              />
-            </div>
             
-            {refuelData.fuelingType === 'internal' && (
+            {refuelData.assignedUserName && (
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <MapPin className="w-4 h-4 inline mr-1" />
-                  Moving to internal fuel station - Company Fuel Depot
-                </p>
-              </div>
-            )}
-            
-            {refuelData.fuelingType === 'external' && refuelData.selectedLocationId && (
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <p className="text-sm text-orange-800">
-                  <ExternalLink className="w-4 h-4 inline mr-1" />
-                  Moving to external location: {fuelLocations.find(l => l.id === refuelData.selectedLocationId)?.name || 'Selected location'}
+                  <User className="w-4 h-4 inline mr-1" />
+                  {refuelData.assignedUserName} will handle this refueling task
                 </p>
               </div>
             )}
           </div>
         );
 
-      case 'refuel-complete':
+      case 'fueling-complete':
         return (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="returnLocation">Return Location</Label>
-              <Input
-                id="returnLocation"
-                placeholder="Bay A-5, Parking Lot B, Ready-for-Rent Area"
-                value={refuelData.returnLocation}
-                onChange={(e) => updateRefuelData('returnLocation', e.target.value)}
-              />
-            </div>
-            
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-800 mb-2">
-                <CheckCircle className="w-4 h-4 inline mr-1" />
-                Refueling Complete Summary:
-              </p>
-              <ul className="text-xs text-green-700 space-y-1">
-                <li>• Fuel added: {refuelData.fuelAmount} {vehicle.fuelType === 'EV' ? 'kWh' : 'liters'}</li>
-                <li>• Total cost: ${refuelData.fuelCost}</li>
-                <li>• Fueling type: {refuelData.fuelingType}</li>
-                {refuelData.fuelingType === 'external' && refuelData.tripTicketId && (
-                  <li>• Trip ticket: {refuelData.tripTicketId}</li>
-                )}
-              </ul>
-            </div>
-          </div>
-        );
-
-      case 'fueling-action':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="fuelAmount">Fuel Amount Added ({vehicle.fuelType === 'EV' ? 'kWh' : 'Liters'})</Label>
-              <Input
-                id="fuelAmount"
-                type="number"
-                step="0.1"
-                placeholder={vehicle.fuelType === 'EV' ? '45.5' : '35.2'}
-                value={refuelData.fuelAmount}
-                onChange={(e) => updateRefuelData('fuelAmount', e.target.value)}
-              />
-            </div>
-            
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-800">
-                <Fuel className="w-4 h-4 inline mr-1" />
-                {vehicle.fuelType === 'EV' ? 'Charging' : 'Fueling'} in progress for {vehicle.fuelType} vehicle
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'record-costs':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="fuelCost">Total Cost</Label>
-              <Input
-                id="fuelCost"
-                type="number"
-                step="0.01"
-                placeholder="45.67"
-                value={refuelData.fuelCost}
-                onChange={(e) => updateRefuelData('fuelCost', e.target.value)}
-              />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="fuelAmount">Fuel Amount Added ({vehicle.fuelType === 'EV' ? 'kWh' : 'Liters'})</Label>
+                <Input
+                  id="fuelAmount"
+                  type="number"
+                  step="0.1"
+                  placeholder={vehicle.fuelType === 'EV' ? '45.5' : '35.2'}
+                  value={refuelData.fuelAmount}
+                  onChange={(e) => updateRefuelData('fuelAmount', e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="fuelCost">Total Cost</Label>
+                <Input
+                  id="fuelCost"
+                  type="number"
+                  step="0.01"
+                  placeholder="45.67"
+                  value={refuelData.fuelCost}
+                  onChange={(e) => updateRefuelData('fuelCost', e.target.value)}
+                />
+              </div>
             </div>
             
             {refuelData.fuelingType === 'external' && (
@@ -385,6 +338,36 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
                 )}
               </div>
             )}
+            
+            {refuelData.fuelingType === 'external' && (
+              <div>
+                <Label htmlFor="returnLocation">Return Location</Label>
+                <Input
+                  id="returnLocation"
+                  placeholder="Bay A-5, Parking Lot B, Ready-for-Rent Area"
+                  value={refuelData.returnLocation}
+                  onChange={(e) => updateRefuelData('returnLocation', e.target.value)}
+                />
+              </div>
+            )}
+            
+            <div className="p-4 bg-green-50 rounded-lg">
+              <p className="text-sm text-green-800 mb-2">
+                <CheckCircle className="w-4 h-4 inline mr-1" />
+                Refueling Process Summary:
+              </p>
+              <ul className="text-xs text-green-700 space-y-1">
+                <li>• {vehicle.fuelType === 'EV' ? 'Charging' : 'Fueling'} type: {refuelData.fuelingType}</li>
+                <li>• Assigned user: {refuelData.assignedUserName}</li>
+                {refuelData.fuelAmount && (
+                  <li>• Fuel added: {refuelData.fuelAmount} {vehicle.fuelType === 'EV' ? 'kWh' : 'liters'}</li>
+                )}
+                {refuelData.fuelCost && <li>• Total cost: ${refuelData.fuelCost}</li>}
+                {refuelData.fuelingType === 'external' && refuelData.tripTicketId && (
+                  <li>• Trip ticket: {refuelData.tripTicketId}</li>
+                )}
+              </ul>
+            </div>
           </div>
         );
 
@@ -400,9 +383,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
       case 'refuel-request':
         return refuelData.currentMileage && refuelData.currentFuelLevel && refuelData.fuelingType;
       case 'trip-ticket':
-        return refuelData.tripTicketId && refuelData.selectedLocationId;
-      case 'move-to-location':
-        return refuelData.driverAssigned;
+        return refuelData.assignedUserId && refuelData.tripTicketId && refuelData.selectedLocationId;
       case 'fueling-complete':
         return refuelData.fuelAmount && refuelData.fuelCost && (
           refuelData.fuelingType === 'internal' || 
