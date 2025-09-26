@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Vehicle } from '@/types/fleet';
 import { 
   MapPin, 
   Sparkles, 
@@ -32,6 +33,7 @@ interface CleaningStep {
 interface CleaningStepsProps {
   workflowId: string;
   vehicleVin: string;
+  vehicle: Vehicle;
   onStepComplete: (stepId: string, notes?: string) => void;
   onWorkflowComplete: (nextAction: 'REFUEL' | 'RENTABLE') => void;
 }
@@ -71,7 +73,7 @@ const initialSteps: CleaningStep[] = [
   }
 ];
 
-export function CleaningSteps({ workflowId, vehicleVin, onStepComplete, onWorkflowComplete }: CleaningStepsProps) {
+export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete, onWorkflowComplete }: CleaningStepsProps) {
   const [steps, setSteps] = useState<CleaningStep[]>(initialSteps);
   const [currentStep, setCurrentStep] = useState(0);
   const [stepNotes, setStepNotes] = useState('');
@@ -137,18 +139,36 @@ export function CleaningSteps({ workflowId, vehicleVin, onStepComplete, onWorkfl
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
-              <CardContent className="p-6 text-center">
-                <Fuel className="w-8 h-8 mx-auto mb-3 text-orange-500" />
-                <h3 className="font-semibold mb-2">Needs Refueling</h3>
-                <p className="text-sm text-muted-foreground">
-                  Vehicle needs fuel before becoming rentable
-                </p>
-                <Button className="mt-4 w-full bg-orange-500 hover:bg-orange-600">
-                  Send to Refuel Queue
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Show fuel/charging options based on vehicle fuel type */}
+            {(vehicle.fuelType === 'PETROL' || vehicle.fuelType === 'DIESEL' || vehicle.fuelType === 'HYBRID') && (
+              <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
+                <CardContent className="p-6 text-center">
+                  <Fuel className="w-8 h-8 mx-auto mb-3 text-orange-500" />
+                  <h3 className="font-semibold mb-2">Needs Refueling</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {vehicle.fuelType} vehicle needs fuel before becoming rentable
+                  </p>
+                  <Button className="mt-4 w-full bg-orange-500 hover:bg-orange-600">
+                    Send to Refuel Queue
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {(vehicle.fuelType === 'EV' || vehicle.fuelType === 'HYBRID') && (
+              <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
+                <CardContent className="p-6 text-center">
+                  <Fuel className="w-8 h-8 mx-auto mb-3 text-blue-500" />
+                  <h3 className="font-semibold mb-2">Needs Charging</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {vehicle.fuelType} vehicle needs charging before becoming rentable
+                  </p>
+                  <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600">
+                    Send to Charging Queue
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('RENTABLE')}>
               <CardContent className="p-6 text-center">

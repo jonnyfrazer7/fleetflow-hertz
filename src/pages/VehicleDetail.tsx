@@ -39,6 +39,7 @@ const mockVehicle: Vehicle = {
   lastMileage: 15240,
   modelDescription: 'Civic LX',
   statusChangeReason: 'Routine maintenance completed',
+  fuelType: 'PETROL',
   createdAt: '2023-01-15T10:00:00Z',
   updatedAt: '2024-01-20T14:30:00Z'
 };

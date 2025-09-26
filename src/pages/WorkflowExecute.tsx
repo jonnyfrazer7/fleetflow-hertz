@@ -165,6 +165,7 @@ export default function WorkflowExecute() {
         <CleaningSteps
           workflowId={workflow.id}
           vehicleVin={vehicle.vin}
+          vehicle={vehicle}
           onStepComplete={handleStepComplete}
           onWorkflowComplete={handleWorkflowComplete}
         />

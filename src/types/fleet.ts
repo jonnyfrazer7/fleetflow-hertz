@@ -19,6 +19,7 @@ export interface Vehicle {
   lastMileage: number;
   modelDescription: string;
   statusChangeReason?: string;
+  fuelType: 'PETROL' | 'DIESEL' | 'HYBRID' | 'EV';
   createdAt: string;
   updatedAt: string;
 }

@@ -73,6 +73,7 @@ export type Database = {
           car_group: string
           color: string
           created_at: string
+          fuel_type: string
           hold_flag: boolean
           installation_date: string
           last_mileage: number | null
@@ -93,6 +94,7 @@ export type Database = {
           car_group: string
           color: string
           created_at?: string
+          fuel_type?: string
           hold_flag?: boolean
           installation_date: string
           last_mileage?: number | null
@@ -113,6 +115,7 @@ export type Database = {
           car_group?: string
           color?: string
           created_at?: string
+          fuel_type?: string
           hold_flag?: boolean
           installation_date?: string
           last_mileage?: number | null
