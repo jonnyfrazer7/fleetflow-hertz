@@ -53,6 +53,7 @@ interface RefuelData {
   fuelAmount: string;
   fuelCost: string;
   receiptUploaded: boolean;
+  returnLocation: string;
 }
 
 const initialSteps: RefuelStep[] = [
@@ -104,10 +105,11 @@ const initialSteps: RefuelStep[] = [
   {
     id: 'refuel-complete',
     title: 'Refuel Complete',
-    description: 'Mark vehicle fuel level as full and close trip ticket',
+    description: 'Mark vehicle fuel level as full and document return location',
     icon: CheckCircle,
     estimatedTime: 2,
-    completed: false
+    completed: false,
+    requiresInput: true
   }
 ];
 
@@ -124,7 +126,8 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     driverAssigned: '',
     fuelAmount: '',
     fuelCost: '',
-    receiptUploaded: false
+    receiptUploaded: false,
+    returnLocation: ''
   });
 
   const completedSteps = steps.filter(step => step.completed).length;
@@ -282,6 +285,36 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
           </div>
         );
 
+      case 'refuel-complete':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="returnLocation">Return Location</Label>
+              <Input
+                id="returnLocation"
+                placeholder="Bay A-5, Parking Lot B, Ready-for-Rent Area"
+                value={refuelData.returnLocation}
+                onChange={(e) => updateRefuelData('returnLocation', e.target.value)}
+              />
+            </div>
+            
+            <div className="p-4 bg-green-50 rounded-lg">
+              <p className="text-sm text-green-800 mb-2">
+                <CheckCircle className="w-4 h-4 inline mr-1" />
+                Refueling Complete Summary:
+              </p>
+              <ul className="text-xs text-green-700 space-y-1">
+                <li>• Fuel added: {refuelData.fuelAmount} {vehicle.fuelType === 'EV' ? 'kWh' : 'liters'}</li>
+                <li>• Total cost: ${refuelData.fuelCost}</li>
+                <li>• Fueling type: {refuelData.fuelingType}</li>
+                {refuelData.fuelingType === 'external' && refuelData.tripTicketId && (
+                  <li>• Trip ticket: {refuelData.tripTicketId}</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        );
+
       case 'fueling-action':
         return (
           <div className="space-y-4">
@@ -369,6 +402,8 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
           refuelData.fuelingType === 'internal' || 
           (refuelData.fuelingType === 'external' && refuelData.receiptUploaded)
         );
+      case 'refuel-complete':
+        return refuelData.returnLocation;
       default:
         return true;
     }
