@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NewWorkflowDialog } from '@/components/workflows/new-workflow-dialog';
+import { useWorkflows, useCreateWorkflow } from '@/hooks/use-workflows';
 import { 
   ClipboardList,
   Plus,
@@ -94,13 +95,26 @@ const workflowStages: { stage: WorkflowStage; label: string; icon: React.Element
 
 export default function Workflows() {
   const [activeTab, setActiveTab] = useState('all');
+  const { data: workflows = [], isLoading } = useWorkflows();
+  const createWorkflow = useCreateWorkflow();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dashboard-bg">
+        <Navbar />
+        <main className="container mx-auto px-4 py-6 space-y-6">
+          <div className="text-center">Loading workflows...</div>
+        </main>
+      </div>
+    );
+  }
 
   const getWorkflowsByStage = (stage: WorkflowStage) => {
-    return mockWorkflows.filter(w => w.stage === stage);
+    return workflows.filter(w => w.stage === stage);
   };
 
   const getWorkflowsByRole = (role: UserRole) => {
-    return mockWorkflows.filter(w => w.assignedUserGroup === role);
+    return workflows.filter(w => w.assignedUserGroup === role);
   };
 
   const getStageStats = () => {
@@ -138,7 +152,7 @@ export default function Workflows() {
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <NewWorkflowDialog />
+            <NewWorkflowDialog onWorkflowCreate={(workflow) => createWorkflow.mutate(workflow)} />
           </div>
         </div>
 
@@ -177,7 +191,7 @@ export default function Workflows() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">
-            <WorkflowList workflows={mockWorkflows} />
+            <WorkflowList workflows={workflows} />
           </TabsContent>
 
           <TabsContent value="cleaning" className="space-y-4">

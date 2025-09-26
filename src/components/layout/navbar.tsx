@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
 import { 
   Car, 
   LayoutDashboard, 
@@ -10,6 +11,7 @@ import {
   BarChart3,
   Settings,
   Bell,
+  LogOut,
   User
 } from 'lucide-react';
 
@@ -22,6 +24,11 @@ const navigation = [
 
 export function Navbar() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
+
+  const isActivePath = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
     <nav className="bg-hertz-navy border-b border-hertz-dark-blue">
@@ -30,7 +37,8 @@ export function Navbar() {
           <div className="flex items-center">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-hertz rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-hertz-yellow rounded-lg flex items-center justify-center"
+                   style={{ background: 'var(--gradient-hertz)' }}>
                 <Car className="w-5 h-5 text-hertz-navy" />
               </div>
               <div className="flex flex-col">
@@ -46,7 +54,7 @@ export function Navbar() {
             {/* Navigation Links */}
             <div className="hidden md:ml-10 md:flex md:space-x-1">
               {navigation.map((item) => {
-                const isActive = location.pathname === item.href;
+                const isActive = isActivePath(item.href);
                 return (
                   <Link
                     key={item.name}
@@ -81,10 +89,16 @@ export function Navbar() {
               <Settings className="w-4 h-4" />
             </Button>
 
-            {/* User */}
-            <Button variant="ghost" size="sm" className="text-white hover:text-hertz-yellow hover:bg-hertz-dark-blue">
+            {/* User & Sign Out */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => signOut()}
+              className="text-white hover:text-hertz-yellow hover:bg-hertz-dark-blue flex items-center gap-2"
+            >
               <User className="w-4 h-4" />
-              <span className="ml-2 hidden sm:block">Manager</span>
+              <span className="hidden sm:block">{user?.email}</span>
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>

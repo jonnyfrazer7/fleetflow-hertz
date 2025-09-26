@@ -6,6 +6,8 @@ import { WorkflowList } from '@/components/workflows/workflow-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useVehicles } from '@/hooks/use-vehicles';
+import { useWorkflows } from '@/hooks/use-workflows';
 import { 
   MapPin, 
   AlertCircle,
@@ -95,6 +97,33 @@ const mockWorkflows = [
 ];
 
 export default function Dashboard() {
+  const { data: vehicles = [], isLoading: vehiclesLoading } = useVehicles();
+  const { data: workflows = [], isLoading: workflowsLoading } = useWorkflows();
+
+  // Calculate stats from real data
+  const stats = {
+    totalVehicles: vehicles.length,
+    readyForRent: vehicles.filter(v => v.operationStatus === 'ACTIVE' && !v.holdFlag).length,
+    inTurnaround: workflows.filter(w => w.status === 'IN_PROGRESS').length,
+    averageTurnaroundTime: 45, // This would need more complex calculation
+    activeWorkflows: workflows.filter(w => w.status !== 'COMPLETED').length,
+    completedToday: workflows.filter(w => {
+      if (!w.endTime) return false;
+      const today = new Date().toDateString();
+      return new Date(w.endTime).toDateString() === today && w.status === 'COMPLETED';
+    }).length
+  };
+
+  if (vehiclesLoading || workflowsLoading) {
+    return (
+      <div className="min-h-screen bg-dashboard-bg">
+        <Navbar />
+        <main className="container mx-auto px-4 py-6 space-y-6">
+          <div className="text-center">Loading...</div>
+        </main>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-dashboard-bg">
       <Navbar />
@@ -124,7 +153,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <DashboardStatsGrid stats={mockStats} />
+        <DashboardStatsGrid stats={stats} />
 
         {/* Alerts & Quick Actions */}
         <div className="grid gap-4 md:grid-cols-3">
@@ -136,7 +165,9 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-status-warning">12</div>
+              <div className="text-2xl font-bold text-status-warning">
+                {workflows.filter(w => w.priority === 'URGENT' && w.status === 'PENDING').length}
+              </div>
               <p className="text-sm text-muted-foreground">Overdue workflows</p>
             </CardContent>
           </Card>
@@ -169,10 +200,10 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Workflows */}
-        <WorkflowList workflows={mockWorkflows} />
+        <WorkflowList workflows={workflows.slice(0, 5)} />
 
         {/* Recent Vehicles */}
-        <VehicleTable vehicles={mockVehicles} />
+        <VehicleTable vehicles={vehicles.slice(0, 10)} />
       </main>
     </div>
   );

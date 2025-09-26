@@ -24,7 +24,11 @@ export default {
         "hertz-yellow": "hsl(var(--hertz-yellow))",
         "hertz-gold": "hsl(var(--hertz-gold))",
         "hertz-navy": "hsl(var(--hertz-navy))",
+        "hertz-dark-blue": "hsl(var(--hertz-dark-blue))",
         "hertz-light-blue": "hsl(var(--hertz-light-blue))",
+        
+        // Gradients
+        "gradient-hertz": "var(--gradient-hertz)",
         
         // Status Colors
         "status-completed": "hsl(var(--status-completed))",
