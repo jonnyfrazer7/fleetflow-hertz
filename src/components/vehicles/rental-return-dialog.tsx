@@ -51,6 +51,9 @@ export function RentalReturnDialog({ open, onOpenChange, vehicle }: RentalReturn
   const { data: workforceUsers = [] } = useWorkforceUsers();
   const [step, setStep] = useState<'capture' | 'confirm'>('capture');
 
+  // Debug vehicle info
+  console.log('Vehicle in dialog:', vehicle);
+
   const [returnData, setReturnData] = useState<RentalReturnData>({
     assignedUserId: '',
     assignedUserName: '',
@@ -73,6 +76,16 @@ export function RentalReturnDialog({ open, onOpenChange, vehicle }: RentalReturn
     }
   }, [currentUser, open, returnData.assignedUserId]);
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Continue button state:', { 
+      canProceed: canProceed(), 
+      returnData, 
+      vehicleFuelType: vehicle.fuelType,
+      step 
+    });
+  }, [returnData, vehicle.fuelType, step]);
+
   const updateReturnData = (field: keyof RentalReturnData, value: string) => {
     setReturnData(prev => ({ ...prev, [field]: value }));
   };
@@ -87,12 +100,24 @@ export function RentalReturnDialog({ open, onOpenChange, vehicle }: RentalReturn
     // Check fuel/charge requirements based on vehicle type
     switch (vehicle.fuelType) {
       case 'EV':
-        return returnData.chargeLevel?.trim();
+        const chargeValid = returnData.chargeLevel && returnData.chargeLevel.trim() !== '';
+        console.log('EV validation:', { chargeLevel: returnData.chargeLevel, chargeValid });
+        return chargeValid;
       case 'PETROL':
       case 'DIESEL':
-        return returnData.fuelLevel?.trim();
+        const fuelValid = returnData.fuelLevel && returnData.fuelLevel.trim() !== '';
+        console.log('Fuel validation:', { fuelLevel: returnData.fuelLevel, fuelValid });
+        return fuelValid;
       case 'HYBRID':
-        return returnData.hybridFuelLevel?.trim() && returnData.hybridChargeLevel?.trim();
+        const hybridFuelValid = returnData.hybridFuelLevel && returnData.hybridFuelLevel.trim() !== '';
+        const hybridChargeValid = returnData.hybridChargeLevel && returnData.hybridChargeLevel.trim() !== '';
+        console.log('Hybrid validation:', { 
+          hybridFuelLevel: returnData.hybridFuelLevel, 
+          hybridChargeLevel: returnData.hybridChargeLevel, 
+          hybridFuelValid, 
+          hybridChargeValid 
+        });
+        return hybridFuelValid && hybridChargeValid;
       default:
         return true;
     }
