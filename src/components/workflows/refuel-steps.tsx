@@ -59,7 +59,7 @@ const initialSteps: RefuelStep[] = [
   {
     id: 'refuel-request',
     title: 'Refuel Request Created',
-    description: 'Capture vehicle details and current fuel status',
+    description: 'Capture vehicle details and select fueling type',
     icon: FileText,
     estimatedTime: 3,
     completed: false,
@@ -68,7 +68,7 @@ const initialSteps: RefuelStep[] = [
   {
     id: 'trip-ticket',
     title: 'Trip Ticket Handling',
-    description: 'Create trip ticket for external fueling (if applicable)',
+    description: 'Create trip ticket for external fueling',
     icon: FileText,
     estimatedTime: 5,
     completed: false,
@@ -157,8 +157,12 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     onStepComplete(step.id, refuelData);
     setIsProcessingStep(false);
 
-    // Move to next step or complete workflow
-    if (stepIndex < totalSteps - 1) {
+    // Handle workflow branching based on fueling type
+    if (step.id === 'refuel-request' && refuelData.fuelingType === 'internal') {
+      // Skip trip ticket for internal fueling, go directly to move-to-location
+      const nextStepIndex = steps.findIndex(s => s.id === 'move-to-location');
+      setCurrentStep(nextStepIndex);
+    } else if (stepIndex < totalSteps - 1) {
       setCurrentStep(stepIndex + 1);
     } else {
       onWorkflowComplete();
@@ -202,12 +206,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
                 />
               </div>
             </div>
-          </div>
-        );
-
-      case 'trip-ticket':
-        return (
-          <div className="space-y-4">
+            
             <div>
               <Label htmlFor="fuelingType">Fueling Type</Label>
               <Select value={refuelData.fuelingType} onValueChange={(value) => updateRefuelData('fuelingType', value)}>
@@ -220,30 +219,33 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
                 </SelectContent>
               </Select>
             </div>
-            
-            {refuelData.fuelingType === 'external' && (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="tripTicketId">Trip Ticket ID</Label>
-                  <Input
-                    id="tripTicketId"
-                    placeholder="TT-2024-001234"
-                    value={refuelData.tripTicketId}
-                    onChange={(e) => updateRefuelData('tripTicketId', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vendorDetails">Vendor Details</Label>
-                  <Textarea
-                    id="vendorDetails"
-                    placeholder="Shell Station, 123 Main St, City"
-                    value={refuelData.vendorDetails}
-                    onChange={(e) => updateRefuelData('vendorDetails', e.target.value)}
-                    rows={2}
-                  />
-                </div>
+          </div>
+        );
+
+      case 'trip-ticket':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="tripTicketId">Trip Ticket ID</Label>
+                <Input
+                  id="tripTicketId"
+                  placeholder="TT-2024-001234"
+                  value={refuelData.tripTicketId}
+                  onChange={(e) => updateRefuelData('tripTicketId', e.target.value)}
+                />
               </div>
-            )}
+              <div>
+                <Label htmlFor="vendorDetails">Vendor Details</Label>
+                <Textarea
+                  id="vendorDetails"
+                  placeholder="Shell Station, 123 Main St, City"
+                  value={refuelData.vendorDetails}
+                  onChange={(e) => updateRefuelData('vendorDetails', e.target.value)}
+                  rows={2}
+                />
+              </div>
+            </div>
           </div>
         );
 
@@ -355,12 +357,9 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     
     switch (step.id) {
       case 'refuel-request':
-        return refuelData.currentMileage && refuelData.currentFuelLevel;
+        return refuelData.currentMileage && refuelData.currentFuelLevel && refuelData.fuelingType;
       case 'trip-ticket':
-        return refuelData.fuelingType && (
-          refuelData.fuelingType === 'internal' || 
-          (refuelData.fuelingType === 'external' && refuelData.tripTicketId && refuelData.vendorDetails)
-        );
+        return refuelData.tripTicketId && refuelData.vendorDetails;
       case 'move-to-location':
         return refuelData.driverAssigned;
       case 'fueling-action':
@@ -407,6 +406,13 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
           const isCompleted = step.completed;
           const canStart = index === currentStep && !isProcessingStep;
           const canComplete = canCompleteStep(step, index);
+          
+          // Skip trip ticket step for internal fueling
+          const shouldSkip = step.id === 'trip-ticket' && refuelData.fuelingType === 'internal' && !isCompleted;
+          
+          if (shouldSkip) {
+            return null;
+          }
 
           return (
             <Card key={step.id} className={`
