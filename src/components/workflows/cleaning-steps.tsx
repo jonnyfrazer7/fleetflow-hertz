@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Vehicle } from '@/types/fleet';
 import { useCurrentUser } from '@/hooks/use-workforce-users';
+import { useWorkflowUpdates } from '@/hooks/use-workflow-updates';
 import { 
   MapPin, 
   Sparkles, 
@@ -83,7 +84,9 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
   const [isProcessingStep, setIsProcessingStep] = useState(false);
   const [showNextActionDialog, setShowNextActionDialog] = useState(false);
   const [assignedUser, setAssignedUser] = useState<string>('');
+  const [workflowStartTime, setWorkflowStartTime] = useState<string | null>(null);
   const { data: currentUser } = useCurrentUser();
+  const { markWorkflowInProgress } = useWorkflowUpdates();
 
   // Auto-assign current user when starting workflow
   React.useEffect(() => {
@@ -93,12 +96,32 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
     }
   }, [currentUser, assignedUser, onUserAssigned]);
 
+  // Handle page unload to mark workflow as in progress if user abandons it
+  React.useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (workflowStartTime && !showNextActionDialog) {
+        // Workflow was started but not completed
+        markWorkflowInProgress(workflowId);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [workflowStartTime, showNextActionDialog, workflowId, markWorkflowInProgress]);
+
   const completedSteps = steps.filter(step => step.completed).length;
   const totalSteps = steps.length;
   const progress = (completedSteps / totalSteps) * 100;
 
-  const handleStartStep = (stepIndex: number) => {
+  const handleStartStep = async (stepIndex: number) => {
     if (stepIndex !== currentStep) return;
+    
+    // Mark workflow as in progress on first step start  
+    if (stepIndex === 0 && !workflowStartTime) {
+      const startTime = new Date().toISOString();
+      await markWorkflowInProgress(workflowId, startTime);
+      setWorkflowStartTime(startTime);
+    }
     
     setIsProcessingStep(true);
     const updatedSteps = [...steps];

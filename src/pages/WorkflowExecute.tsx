@@ -12,6 +12,7 @@ import { KeyHandlingSteps } from '@/components/workflows/key-handling-steps';
 import { useWorkflows } from '@/hooks/use-workflows';
 import { useVehicles } from '@/hooks/use-vehicles';
 import { toast } from '@/hooks/use-toast';
+import { useWorkflowUpdates } from '@/hooks/use-workflow-updates';
 
 export default function WorkflowExecute() {
   const { stage, workflowId } = useParams<{ stage: string; workflowId: string }>();
@@ -19,6 +20,7 @@ export default function WorkflowExecute() {
   const navigate = useNavigate();
   const { data: workflows = [], isLoading: workflowsLoading } = useWorkflows();
   const { data: vehicles = [], isLoading: vehiclesLoading } = useVehicles();
+  const { completeWorkflowAndTransition, markWorkflowInProgress } = useWorkflowUpdates();
 
   // Handle new workflow from rental return
   const vehicleVin = searchParams.get('vehicleVin');
@@ -91,8 +93,18 @@ export default function WorkflowExecute() {
     });
   };
 
-  const handleWorkflowComplete = (nextAction: 'REFUEL' | 'CHARGE' | 'KEY_HANDLING') => {
+  const handleWorkflowComplete = async (nextAction: 'REFUEL' | 'CHARGE' | 'KEY_HANDLING') => {
+    const currentMileage = rentalReturnData?.mileage ? parseInt(rentalReturnData.mileage) : undefined;
+    
     if (nextAction === 'REFUEL') {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'REFUEL', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Refuel Workflow',
         description: 'Vehicle will be sent to refuel queue.',
@@ -101,6 +113,14 @@ export default function WorkflowExecute() {
         navigate(`/workflows/refuel/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
       }, 1500);
     } else if (nextAction === 'CHARGE') {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'EV_CHARGING', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Charging Workflow', 
         description: 'Vehicle will be sent to charging queue.',
@@ -109,6 +129,14 @@ export default function WorkflowExecute() {
         navigate(`/workflows/ev_charging/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
       }, 1500);
     } else if (nextAction === 'KEY_HANDLING') {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'KEY_HANDLING', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Key Handling Workflow',
         description: 'Vehicle will be sent to key handling queue.',
@@ -119,8 +147,18 @@ export default function WorkflowExecute() {
     }
   };
 
-  const handleRefuelComplete = (nextAction: 'KEY_HANDLING' | 'CHARGE') => {
+  const handleRefuelComplete = async (nextAction: 'KEY_HANDLING' | 'CHARGE') => {
+    const currentMileage = rentalReturnData?.mileage ? parseInt(rentalReturnData.mileage) : undefined;
+    
     if (nextAction === 'CHARGE') {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'EV_CHARGING', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Charging Workflow',
         description: 'Hybrid vehicle needs charging next.',
@@ -129,6 +167,14 @@ export default function WorkflowExecute() {
         navigate(`/workflows/ev_charging/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
       }, 1500);
     } else {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'KEY_HANDLING', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Key Handling Workflow',
         description: 'Vehicle is ready for key handling.',
@@ -139,8 +185,18 @@ export default function WorkflowExecute() {
     }
   };
 
-  const handleChargingComplete = (nextAction: 'KEY_HANDLING' | 'REFUEL') => {
+  const handleChargingComplete = async (nextAction: 'KEY_HANDLING' | 'REFUEL') => {
+    const currentMileage = rentalReturnData?.mileage ? parseInt(rentalReturnData.mileage) : undefined;
+    
     if (nextAction === 'REFUEL') {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'REFUEL', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Refuel Workflow',
         description: 'Hybrid vehicle needs fuel next.',
@@ -149,6 +205,14 @@ export default function WorkflowExecute() {
         navigate(`/workflows/refuel/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
       }, 1500);
     } else {
+      await completeWorkflowAndTransition(
+        workflowId !== 'new' ? workflowId : null,
+        vehicle.vin, 
+        'KEY_HANDLING', 
+        workflow?.startTime,
+        currentMileage
+      );
+      
       toast({
         title: 'Moving to Key Handling Workflow',
         description: 'Vehicle is ready for key handling.',
@@ -311,7 +375,18 @@ export default function WorkflowExecute() {
             vehicleVin={vehicle.vin}
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
-            onWorkflowComplete={() => {
+            onWorkflowComplete={async () => {
+              const currentMileage = rentalReturnData?.mileage ? parseInt(rentalReturnData.mileage) : undefined;
+              
+              // Complete final workflow - no next stage
+              await completeWorkflowAndTransition(
+                workflowId !== 'new' ? workflowId : null,
+                vehicle.vin, 
+                null, // No next stage - process complete
+                workflow?.startTime,
+                currentMileage
+              );
+              
               toast({
                 title: 'Turnaround Process Complete!',
                 description: 'Vehicle is now available for rent.',
