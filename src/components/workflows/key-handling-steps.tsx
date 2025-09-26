@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Vehicle } from '@/types/fleet';
-import { useCurrentUser } from '@/hooks/use-workforce-users';
+import { useCurrentUser, useWorkforceUsers } from '@/hooks/use-workforce-users';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Key, 
   CheckCircle,
@@ -72,6 +73,7 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
   const [isProcessingStep, setIsProcessingStep] = useState(false);
   const [assignedUser, setAssignedUser] = useState<string>('');
   const { data: currentUser } = useCurrentUser();
+  const { data: workforceUsers = [] } = useWorkforceUsers();
 
   const [keyHandlingData, setKeyHandlingData] = useState<KeyHandlingData>({
     keyBoxNumber: '',
@@ -228,12 +230,39 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
             </Badge>
           </div>
           
-          {assignedUser && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="w-4 h-4" />
-              <span>Assigned to: {assignedUser}</span>
+          <div className="space-y-4">
+            <div>
+              <Label>Assign User</Label>
+              <Select 
+                value={keyHandlingData.assignedUserId} 
+                onValueChange={(value) => {
+                  const user = workforceUsers.find(u => u.id === value);
+                  const userName = user?.name || '';
+                  setAssignedUser(userName);
+                  setKeyHandlingData(prev => ({
+                    ...prev,
+                    assignedUserId: value,
+                    assignedUserName: userName
+                  }));
+                  onUserAssigned?.(value, userName);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user to assign" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  {workforceUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      <div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-xs text-muted-foreground">{user.role}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
+          </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
