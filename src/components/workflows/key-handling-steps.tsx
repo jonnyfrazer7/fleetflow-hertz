@@ -247,6 +247,11 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
     handleCompleteStep(currentStep);
   };
 
+  const handleKeepInTurnaround = () => {
+    updateKeyHandlingData('markAsAvailable', false);
+    handleCompleteStep(currentStep);
+  };
+
   return (
     <div className="space-y-6">
       {/* Progress Header */}
@@ -337,13 +342,23 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
                     
                     <div className="flex gap-3">
                       {step.id === 'availability-confirmation' ? (
-                        <Button 
-                          onClick={handleAvailabilityConfirmation}
-                          className="bg-workflow-step-completed hover:bg-workflow-step-completed/80"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Yes, Mark Available for Rent
-                        </Button>
+                        <div className="grid gap-3 md:grid-cols-2 w-full">
+                          <Button 
+                            onClick={handleAvailabilityConfirmation}
+                            className="bg-workflow-step-completed hover:bg-workflow-step-completed/80"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Ready for Rent
+                          </Button>
+                          <Button 
+                            onClick={handleKeepInTurnaround}
+                            variant="outline"
+                            className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                          >
+                            <Clock className="w-4 h-4 mr-2" />
+                            Keep in Turnaround
+                          </Button>
+                        </div>
                       ) : (
                         <Button 
                           onClick={() => handleCompleteStep(index)}

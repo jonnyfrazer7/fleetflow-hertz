@@ -37,7 +37,7 @@ interface CleaningStepsProps {
   vehicleVin: string;
   vehicle: Vehicle;
   onStepComplete: (stepId: string, notes?: string) => void;
-  onWorkflowComplete: (nextAction: 'REFUEL' | 'RENTABLE') => void;
+  onWorkflowComplete: (nextAction: 'REFUEL' | 'CHARGE' | 'KEY_HANDLING') => void;
   onUserAssigned?: (userId: string, userName: string) => void;
 }
 
@@ -132,7 +132,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
     }
   };
 
-  const handleNextAction = (action: 'REFUEL' | 'RENTABLE') => {
+  const handleNextAction = (action: 'REFUEL' | 'CHARGE' | 'KEY_HANDLING') => {
     onWorkflowComplete(action);
   };
 
@@ -151,7 +151,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
             <p className="text-muted-foreground mb-6">What should happen next with this vehicle?</p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             {/* Show fuel/charging options based on vehicle fuel type */}
             {(vehicle.fuelType === 'PETROL' || vehicle.fuelType === 'DIESEL' || vehicle.fuelType === 'HYBRID') && (
               <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
@@ -159,7 +159,7 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
                   <Fuel className="w-8 h-8 mx-auto mb-3 text-orange-500" />
                   <h3 className="font-semibold mb-2">Needs Refueling</h3>
                   <p className="text-sm text-muted-foreground">
-                    {vehicle.fuelType} vehicle needs fuel before becoming rentable
+                    Vehicle needs fuel before key handling
                   </p>
                   <Button className="mt-4 w-full bg-orange-500 hover:bg-orange-600">
                     Send to Refuel Queue
@@ -169,12 +169,12 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
             )}
 
             {(vehicle.fuelType === 'EV' || vehicle.fuelType === 'HYBRID') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
+              <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('CHARGE')}>
                 <CardContent className="p-6 text-center">
                   <Fuel className="w-8 h-8 mx-auto mb-3 text-workflow-step-progress" />
                   <h3 className="font-semibold mb-2">Needs Charging</h3>
                   <p className="text-sm text-muted-foreground">
-                    {vehicle.fuelType} vehicle needs charging before becoming rentable
+                    Vehicle needs charging before key handling
                   </p>
                   <Button className="mt-4 w-full bg-workflow-step-progress hover:bg-workflow-step-progress/80">
                     Send to Charging Queue
@@ -183,15 +183,15 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
               </Card>
             )}
 
-            <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('RENTABLE')}>
+            <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('KEY_HANDLING')}>
               <CardContent className="p-6 text-center">
-                <Car className="w-8 h-8 mx-auto mb-3 text-green-500" />
-                <h3 className="font-semibold mb-2">Ready to Rent</h3>
+                <ArrowRight className="w-8 h-8 mx-auto mb-3 text-blue-500" />
+                <h3 className="font-semibold mb-2">Skip to Key Handling</h3>
                 <p className="text-sm text-muted-foreground">
-                  Vehicle is clean and ready for customers
+                  Vehicle doesn't need refuel/charge
                 </p>
-                <Button className="mt-4 w-full bg-green-500 hover:bg-green-600">
-                  Make Rentable
+                <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600">
+                  Go to Key Handling
                 </Button>
               </CardContent>
             </Card>

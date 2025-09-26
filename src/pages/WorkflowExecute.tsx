@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Car, Clock, Calendar, User } from 'lucide-react';
 import { CleaningSteps } from '@/components/workflows/cleaning-steps';
 import { RefuelSteps } from '@/components/workflows/refuel-steps';
+import { ChargingSteps } from '@/components/workflows/charging-steps';
 import { KeyHandlingSteps } from '@/components/workflows/key-handling-steps';
 import { useWorkflows } from '@/hooks/use-workflows';
 import { useVehicles } from '@/hooks/use-vehicles';
@@ -90,35 +91,72 @@ export default function WorkflowExecute() {
     });
   };
 
-  const handleWorkflowComplete = (nextAction?: 'REFUEL' | 'RENTABLE') => {
-    if (nextAction) {
+  const handleWorkflowComplete = (nextAction: 'REFUEL' | 'CHARGE' | 'KEY_HANDLING') => {
+    if (nextAction === 'REFUEL') {
       toast({
-        title: 'Cleaning Workflow Complete',
-        description: `Vehicle will be moved to ${nextAction === 'REFUEL' ? 'refuel queue' : 'rentable inventory'}.`,
+        title: 'Moving to Refuel Workflow',
+        description: 'Vehicle will be sent to refuel queue.',
       });
-    } else {
+      setTimeout(() => {
+        navigate(`/workflows/refuel/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    } else if (nextAction === 'CHARGE') {
       toast({
-        title: 'Refuel Workflow Complete',
-        description: 'Vehicle has been refueled and is ready for the next stage.',
+        title: 'Moving to Charging Workflow', 
+        description: 'Vehicle will be sent to charging queue.',
       });
+      setTimeout(() => {
+        navigate(`/workflows/ev_charging/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    } else if (nextAction === 'KEY_HANDLING') {
+      toast({
+        title: 'Moving to Key Handling Workflow',
+        description: 'Vehicle will be sent to key handling queue.',
+      });
+      setTimeout(() => {
+        navigate(`/workflows/key_handling/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
     }
-    
-    // Navigate back to workflows after a short delay
-    setTimeout(() => {
-      navigate('/workflows');
-    }, 2000);
   };
 
-  const handleRefuelComplete = () => {
-    toast({
-      title: 'Refuel Workflow Complete',
-      description: 'Moving to Key Handling workflow next.',
-    });
-    
-    // Navigate to key handling workflow after a short delay
-    setTimeout(() => {
-      navigate('/workflows/key_handling');
-    }, 2000);
+  const handleRefuelComplete = (nextAction: 'KEY_HANDLING' | 'CHARGE') => {
+    if (nextAction === 'CHARGE') {
+      toast({
+        title: 'Moving to Charging Workflow',
+        description: 'Hybrid vehicle needs charging next.',
+      });
+      setTimeout(() => {
+        navigate(`/workflows/ev_charging/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    } else {
+      toast({
+        title: 'Moving to Key Handling Workflow',
+        description: 'Vehicle is ready for key handling.',
+      });
+      setTimeout(() => {
+        navigate(`/workflows/key_handling/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    }
+  };
+
+  const handleChargingComplete = (nextAction: 'KEY_HANDLING' | 'REFUEL') => {
+    if (nextAction === 'REFUEL') {
+      toast({
+        title: 'Moving to Refuel Workflow',
+        description: 'Hybrid vehicle needs fuel next.',
+      });
+      setTimeout(() => {
+        navigate(`/workflows/refuel/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    } else {
+      toast({
+        title: 'Moving to Key Handling Workflow',
+        description: 'Vehicle is ready for key handling.',
+      });
+      setTimeout(() => {
+        navigate(`/workflows/key_handling/execute/new?vehicleVin=${vehicle.vin}&returnData=${returnDataParam}`);
+      }, 1500);
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -254,6 +292,16 @@ export default function WorkflowExecute() {
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
             onWorkflowComplete={handleRefuelComplete}
+          />
+        )}
+        
+        {stage?.toUpperCase() === 'EV_CHARGING' && (
+          <ChargingSteps
+            workflowId={isNewWorkflow ? 'new' : workflow.id}
+            vehicleVin={vehicle.vin}
+            vehicle={vehicle}
+            onStepComplete={handleStepComplete}
+            onWorkflowComplete={handleChargingComplete}
           />
         )}
         

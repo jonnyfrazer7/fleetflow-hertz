@@ -42,7 +42,7 @@ interface RefuelStepsProps {
   vehicleVin: string;
   vehicle: Vehicle;
   onStepComplete: (stepId: string, data?: any) => void;
-  onWorkflowComplete: () => void;
+  onWorkflowComplete: (nextAction: 'KEY_HANDLING' | 'CHARGE') => void;
 }
 
 interface RefuelData {
@@ -93,6 +93,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
   const [steps, setSteps] = useState<RefuelStep[]>(initialSteps);
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessingStep, setIsProcessingStep] = useState(false);
+  const [showNextActionDialog, setShowNextActionDialog] = useState(false);
   const { data: fuelLocations = [] } = useFuelLocations();
   const { data: allLocations = [] } = useLocations();
   const { data: currentUser } = useCurrentUser();
@@ -163,7 +164,7 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     } else if (stepIndex < totalSteps - 1) {
       setCurrentStep(stepIndex + 1);
     } else {
-      onWorkflowComplete();
+      setShowNextActionDialog(true);
     }
   };
 
@@ -405,6 +406,60 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
         return true;
     }
   };
+
+  const handleNextAction = (action: 'KEY_HANDLING' | 'CHARGE') => {
+    onWorkflowComplete(action);
+  };
+
+  if (showNextActionDialog) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-workflow-step-completed">
+            <CheckCircle className="w-6 h-6" />
+            {vehicle.fuelType === 'EV' ? 'Charging' : 'Refueling'} Complete!
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-center">
+            <p className="text-lg mb-4">Vehicle {vehicleVin.substring(0, 8)}... has been {vehicle.fuelType === 'EV' ? 'charged' : 'refueled'} successfully.</p>
+            <p className="text-muted-foreground mb-6">What should happen next with this vehicle?</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* For hybrid vehicles, show charge option if we just refueled */}
+            {vehicle.fuelType === 'HYBRID' && (
+              <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('CHARGE')}>
+                <CardContent className="p-6 text-center">
+                  <Fuel className="w-8 h-8 mx-auto mb-3 text-workflow-step-progress" />
+                  <h3 className="font-semibold mb-2">Needs Charging</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Hybrid vehicle also needs charging
+                  </p>
+                  <Button className="mt-4 w-full bg-workflow-step-progress hover:bg-workflow-step-progress/80">
+                    Send to Charging Queue
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('KEY_HANDLING')}>
+              <CardContent className="p-6 text-center">
+                <ArrowRight className="w-8 h-8 mx-auto mb-3 text-blue-500" />
+                <h3 className="font-semibold mb-2">Go to Key Handling</h3>
+                <p className="text-sm text-muted-foreground">
+                  Vehicle is ready for key handling workflow
+                </p>
+                <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600">
+                  Go to Key Handling
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
