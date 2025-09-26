@@ -137,6 +137,45 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
   };
 
   if (showNextActionDialog) {
+    // Parse the rental return data to check fuel/charge levels
+    let rentalReturnData = null;
+    try {
+      const returnDataParam = new URLSearchParams(window.location.search).get('returnData');
+      if (returnDataParam) {
+        rentalReturnData = JSON.parse(decodeURIComponent(returnDataParam));
+      }
+    } catch (e) {
+      console.error('Failed to parse return data:', e);
+    }
+
+    // Determine what the vehicle needs based on fuel/charge levels
+    const needsRefuel = () => {
+      if (vehicle.fuelType === 'PETROL' || vehicle.fuelType === 'DIESEL') {
+        const fuelLevel = parseInt(rentalReturnData?.fuelLevel || '100');
+        return fuelLevel < 50; // Need refuel if below 50%
+      }
+      if (vehicle.fuelType === 'HYBRID') {
+        const hybridFuelLevel = parseInt(rentalReturnData?.hybridFuelLevel || '100');
+        return hybridFuelLevel < 50;
+      }
+      return false;
+    };
+
+    const needsCharge = () => {
+      if (vehicle.fuelType === 'EV') {
+        const chargeLevel = parseInt(rentalReturnData?.chargeLevel || '100');
+        return chargeLevel < 80; // Need charge if below 80%
+      }
+      if (vehicle.fuelType === 'HYBRID') {
+        const hybridChargeLevel = parseInt(rentalReturnData?.hybridChargeLevel || '100');
+        return hybridChargeLevel < 80;
+      }
+      return false;
+    };
+
+    const showRefuelOption = needsRefuel();
+    const showChargeOption = needsCharge();
+
     return (
       <Card>
         <CardHeader>
@@ -151,15 +190,48 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
             <p className="text-muted-foreground mb-6">What should happen next with this vehicle?</p>
           </div>
 
+          {/* Show current fuel/charge status */}
+          {rentalReturnData && (
+            <Card className="bg-info-bg border-info-border">
+              <CardContent className="p-4">
+                <h4 className="font-medium text-info-text mb-2">Current Vehicle Status:</h4>
+                <div className="grid gap-2 text-sm text-info-text">
+                  {vehicle.fuelType === 'PETROL' || vehicle.fuelType === 'DIESEL' ? (
+                    <div className="flex items-center gap-2">
+                      <Fuel className="w-4 h-4" />
+                      <span>Fuel Level: {rentalReturnData.fuelLevel || 'N/A'}%</span>
+                    </div>
+                  ) : vehicle.fuelType === 'EV' ? (
+                    <div className="flex items-center gap-2">
+                      <ArrowRight className="w-4 h-4" />
+                      <span>Battery Level: {rentalReturnData.chargeLevel || 'N/A'}%</span>
+                    </div>
+                  ) : vehicle.fuelType === 'HYBRID' ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <Fuel className="w-4 h-4" />
+                        <span>Fuel Level: {rentalReturnData.hybridFuelLevel || 'N/A'}%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="w-4 h-4" />
+                        <span>Battery Level: {rentalReturnData.hybridChargeLevel || 'N/A'}%</span>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid gap-4 md:grid-cols-3">
-            {/* Show fuel/charging options based on vehicle fuel type */}
-            {(vehicle.fuelType === 'PETROL' || vehicle.fuelType === 'DIESEL' || vehicle.fuelType === 'HYBRID') && (
+            {/* Show refuel option if needed */}
+            {showRefuelOption && (
               <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('REFUEL')}>
                 <CardContent className="p-6 text-center">
                   <Fuel className="w-8 h-8 mx-auto mb-3 text-orange-500" />
                   <h3 className="font-semibold mb-2">Needs Refueling</h3>
                   <p className="text-sm text-muted-foreground">
-                    Vehicle needs fuel before key handling
+                    Fuel level: {rentalReturnData?.fuelLevel || rentalReturnData?.hybridFuelLevel || 'Low'}%
                   </p>
                   <Button className="mt-4 w-full bg-orange-500 hover:bg-orange-600">
                     Send to Refuel Queue
@@ -168,13 +240,14 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
               </Card>
             )}
 
-            {(vehicle.fuelType === 'EV' || vehicle.fuelType === 'HYBRID') && (
+            {/* Show charge option if needed */}
+            {showChargeOption && (
               <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('CHARGE')}>
                 <CardContent className="p-6 text-center">
-                  <Fuel className="w-8 h-8 mx-auto mb-3 text-workflow-step-progress" />
+                  <ArrowRight className="w-8 h-8 mx-auto mb-3 text-workflow-step-progress" />
                   <h3 className="font-semibold mb-2">Needs Charging</h3>
                   <p className="text-sm text-muted-foreground">
-                    Vehicle needs charging before key handling
+                    Battery level: {rentalReturnData?.chargeLevel || rentalReturnData?.hybridChargeLevel || 'Low'}%
                   </p>
                   <Button className="mt-4 w-full bg-workflow-step-progress hover:bg-workflow-step-progress/80">
                     Send to Charging Queue
@@ -183,12 +256,13 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
               </Card>
             )}
 
+            {/* Always show skip to key handling option */}
             <Card className="cursor-pointer hover:shadow-lg transition-all" onClick={() => handleNextAction('KEY_HANDLING')}>
               <CardContent className="p-6 text-center">
                 <ArrowRight className="w-8 h-8 mx-auto mb-3 text-blue-500" />
                 <h3 className="font-semibold mb-2">Skip to Key Handling</h3>
                 <p className="text-sm text-muted-foreground">
-                  Vehicle doesn't need refuel/charge
+                  {(!showRefuelOption && !showChargeOption) ? 'Vehicle has sufficient fuel/charge' : 'Skip fuel/charge for now'}
                 </p>
                 <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600">
                   Go to Key Handling
