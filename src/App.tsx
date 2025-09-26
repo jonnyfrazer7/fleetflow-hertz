@@ -9,6 +9,7 @@ import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
 import Workflows from "./pages/Workflows";
 import WorkflowStage from "./pages/WorkflowStage";
+import WorkflowExecute from "./pages/WorkflowExecute";
 import Analytics from "./pages/Analytics";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,11 @@ const App = () => (
           <Route path="/workflows/:stage" element={
             <ProtectedRoute>
               <WorkflowStage />
+            </ProtectedRoute>
+          } />
+          <Route path="/workflows/:stage/execute/:workflowId" element={
+            <ProtectedRoute>
+              <WorkflowExecute />
             </ProtectedRoute>
           } />
           <Route path="/analytics" element={

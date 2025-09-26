@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Sparkles, Wrench, Fuel, Zap, MapPin } from 'lucide-react';
-import { VehicleTable } from '@/components/vehicles/vehicle-table';
+import { CleaningWorkOrderTable } from '@/components/workflows/cleaning-work-order-table';
 import { useWorkflows } from '@/hooks/use-workflows';
-import { useVehicles } from '@/hooks/use-vehicles';
 import type { WorkflowStage } from '@/types/fleet';
 
 const stageConfig = {
@@ -20,8 +19,7 @@ const stageConfig = {
 
 export default function WorkflowStagePage() {
   const { stage } = useParams<{ stage: string }>();
-  const { data: workflows = [], isLoading: workflowsLoading } = useWorkflows();
-  const { data: vehicles = [], isLoading: vehiclesLoading } = useVehicles();
+  const { data: workflows = [], isLoading } = useWorkflows();
 
   if (!stage || !(stage.toUpperCase() in stageConfig)) {
     return (
@@ -43,7 +41,7 @@ export default function WorkflowStagePage() {
   const config = stageConfig[stageName];
   const Icon = config.icon;
 
-  if (workflowsLoading || vehiclesLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-dashboard-bg">
         <Navbar />
@@ -56,10 +54,6 @@ export default function WorkflowStagePage() {
 
   // Get workflows for this stage
   const stageWorkflows = workflows.filter(w => w.stage === stageName);
-  
-  // Get vehicles that are in workflows for this stage
-  const stageVehicleVins = stageWorkflows.map(w => w.vehicleVin);
-  const stageVehicles = vehicles.filter(v => stageVehicleVins.includes(v.vin));
 
   // Calculate statistics
   const pendingCount = stageWorkflows.filter(w => w.status === 'PENDING').length;
@@ -84,11 +78,11 @@ export default function WorkflowStagePage() {
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-4 h-4 rounded-full ${config.color}`} />
                 <h1 className="text-3xl font-heading font-bold text-foreground">
-                  {config.label} Stage
+                  {config.label} Work Orders
                 </h1>
               </div>
               <p className="text-muted-foreground">
-                Vehicles currently in the {config.label.toLowerCase()} workflow stage
+                Manage and execute {config.label.toLowerCase()} work orders for vehicles
               </p>
             </div>
           </div>
@@ -136,22 +130,8 @@ export default function WorkflowStagePage() {
           </Card>
         </div>
 
-        {/* Vehicles in this stage */}
-        {stageVehicles.length > 0 ? (
-          <VehicleTable vehicles={stageVehicles} />
-        ) : (
-          <Card>
-            <CardContent className="py-12">
-              <div className="text-center">
-                <Icon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No vehicles in {config.label.toLowerCase()}</h3>
-                <p className="text-muted-foreground">
-                  There are currently no vehicles in the {config.label.toLowerCase()} workflow stage.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Work Orders for this stage */}
+        <CleaningWorkOrderTable workflows={stageWorkflows} />
       </main>
     </div>
   );
