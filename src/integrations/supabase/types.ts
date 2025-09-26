@@ -14,16 +14,197 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          location_code: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          location_code?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          location_code?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          location_code: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_code?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_code?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          car_group: string
+          color: string
+          created_at: string
+          hold_flag: boolean
+          installation_date: string
+          last_mileage: number | null
+          license_plate: string | null
+          location_country: string
+          make: string
+          model_code: string | null
+          model_description: string | null
+          model_group: string
+          operation_status: string
+          own_area_unit_no: string | null
+          owning_country: string
+          updated_at: string
+          vin: string
+          year: number
+        }
+        Insert: {
+          car_group: string
+          color: string
+          created_at?: string
+          hold_flag?: boolean
+          installation_date: string
+          last_mileage?: number | null
+          license_plate?: string | null
+          location_country: string
+          make: string
+          model_code?: string | null
+          model_description?: string | null
+          model_group: string
+          operation_status?: string
+          own_area_unit_no?: string | null
+          owning_country: string
+          updated_at?: string
+          vin: string
+          year: number
+        }
+        Update: {
+          car_group?: string
+          color?: string
+          created_at?: string
+          hold_flag?: boolean
+          installation_date?: string
+          last_mileage?: number | null
+          license_plate?: string | null
+          location_country?: string
+          make?: string
+          model_code?: string | null
+          model_description?: string | null
+          model_group?: string
+          operation_status?: string
+          own_area_unit_no?: string | null
+          owning_country?: string
+          updated_at?: string
+          vin?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      workflows: {
+        Row: {
+          actual_duration: number | null
+          assigned_user_group: string
+          assigned_user_id: string | null
+          created_at: string
+          end_time: string | null
+          estimated_duration: number
+          id: string
+          notes: string | null
+          priority: string
+          stage: string
+          start_time: string | null
+          status: string
+          updated_at: string
+          vehicle_vin: string
+        }
+        Insert: {
+          actual_duration?: number | null
+          assigned_user_group: string
+          assigned_user_id?: string | null
+          created_at?: string
+          end_time?: string | null
+          estimated_duration?: number
+          id?: string
+          notes?: string | null
+          priority?: string
+          stage: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_vin: string
+        }
+        Update: {
+          actual_duration?: number | null
+          assigned_user_group?: string
+          assigned_user_id?: string | null
+          created_at?: string
+          end_time?: string | null
+          estimated_duration?: number
+          id?: string
+          notes?: string | null
+          priority?: string
+          stage?: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_vin?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflows_vehicle_vin_fkey"
+            columns: ["vehicle_vin"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["vin"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "car_cleaner" | "operations_user" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +331,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "car_cleaner", "operations_user", "manager"],
+    },
   },
 } as const
