@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Vehicle } from '@/types/fleet';
-import { useFuelLocations } from '@/hooks/use-locations';
+import { useFuelLocations, useLocations } from '@/hooks/use-locations';
 import { useCurrentUser, useWorkforceUsers } from '@/hooks/use-workforce-users';
 import { 
   MapPin, 
@@ -94,8 +94,11 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessingStep, setIsProcessingStep] = useState(false);
   const { data: fuelLocations = [] } = useFuelLocations();
+  const { data: allLocations = [] } = useLocations();
   const { data: currentUser } = useCurrentUser();
   const { data: workforceUsers = [] } = useWorkforceUsers();
+  
+  const rentalLocations = allLocations.filter(location => location.type === 'rental');
   
   const [refuelData, setRefuelData] = useState<RefuelData>({
     currentMileage: '',
@@ -342,12 +345,21 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
             {refuelData.fuelingType === 'external' && (
               <div>
                 <Label htmlFor="returnLocation">Return Location</Label>
-                <Input
-                  id="returnLocation"
-                  placeholder="Bay A-5, Parking Lot B, Ready-for-Rent Area"
-                  value={refuelData.returnLocation}
-                  onChange={(e) => updateRefuelData('returnLocation', e.target.value)}
-                />
+                <Select value={refuelData.returnLocation} onValueChange={(value) => updateRefuelData('returnLocation', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select return location" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50">
+                    {rentalLocations.map((location) => (
+                      <SelectItem key={location.id} value={location.name}>
+                        <div>
+                          <div className="font-medium">{location.name}</div>
+                          <div className="text-xs text-muted-foreground">{location.address}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
             
