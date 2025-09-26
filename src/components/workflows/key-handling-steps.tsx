@@ -147,6 +147,38 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
         return (
           <div className="space-y-4">
             <div>
+              <Label>Assign User</Label>
+              <Select 
+                value={keyHandlingData.assignedUserId} 
+                onValueChange={(value) => {
+                  const user = workforceUsers.find(u => u.id === value);
+                  const userName = user?.name || '';
+                  setAssignedUser(userName);
+                  setKeyHandlingData(prev => ({
+                    ...prev,
+                    assignedUserId: value,
+                    assignedUserName: userName
+                  }));
+                  onUserAssigned?.(value, userName);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user to assign" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  {workforceUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      <div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-xs text-muted-foreground">{user.role}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
               <Label htmlFor="keyBoxNumber">Key Box Number</Label>
               <Input
                 id="keyBoxNumber"
@@ -228,40 +260,6 @@ export function KeyHandlingSteps({ workflowId, vehicleVin, vehicle, onStepComple
             <Badge variant="outline" className="text-sm">
               {completedSteps} of {totalSteps} complete
             </Badge>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <Label>Assign User</Label>
-              <Select 
-                value={keyHandlingData.assignedUserId} 
-                onValueChange={(value) => {
-                  const user = workforceUsers.find(u => u.id === value);
-                  const userName = user?.name || '';
-                  setAssignedUser(userName);
-                  setKeyHandlingData(prev => ({
-                    ...prev,
-                    assignedUserId: value,
-                    assignedUserName: userName
-                  }));
-                  onUserAssigned?.(value, userName);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select user to assign" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  {workforceUsers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      <div>
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-xs text-muted-foreground">{user.role}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           
           <div className="space-y-2">
