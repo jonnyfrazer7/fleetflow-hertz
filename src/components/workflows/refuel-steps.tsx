@@ -110,12 +110,22 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
     fuelingType: '',
     tripTicketId: '',
     selectedLocationId: '',
-    driverAssigned: currentUser?.name || '',
+    driverAssigned: '',
     fuelAmount: '',
     fuelCost: '',
     receiptUploaded: false,
     returnLocation: ''
   });
+
+  // Auto-populate driver with current user when available
+  React.useEffect(() => {
+    if (currentUser && !refuelData.driverAssigned) {
+      setRefuelData(prev => ({
+        ...prev,
+        driverAssigned: currentUser.name
+      }));
+    }
+  }, [currentUser, refuelData.driverAssigned]);
 
   const completedSteps = steps.filter(step => step.completed).length;
   const totalSteps = steps.length;
