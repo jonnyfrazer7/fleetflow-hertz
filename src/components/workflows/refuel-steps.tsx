@@ -165,6 +165,10 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
       // Skip trip ticket for internal fueling, go directly to move-to-location
       const nextStepIndex = steps.findIndex(s => s.id === 'move-to-location');
       setCurrentStep(nextStepIndex);
+    } else if (step.id === 'fueling-action' && refuelData.fuelingType === 'internal') {
+      // Skip record costs for internal fueling, go directly to refuel-complete
+      const nextStepIndex = steps.findIndex(s => s.id === 'refuel-complete');
+      setCurrentStep(nextStepIndex);
     } else if (stepIndex < totalSteps - 1) {
       setCurrentStep(stepIndex + 1);
     } else {
@@ -443,9 +447,12 @@ export function RefuelSteps({ workflowId, vehicleVin, vehicle, onStepComplete, o
           const canComplete = canCompleteStep(step, index);
           
           // Skip trip ticket step for internal fueling
-          const shouldSkip = step.id === 'trip-ticket' && refuelData.fuelingType === 'internal' && !isCompleted;
+          const shouldSkipTripTicket = step.id === 'trip-ticket' && refuelData.fuelingType === 'internal' && !isCompleted;
           
-          if (shouldSkip) {
+          // Skip record costs step for internal fueling
+          const shouldSkipRecordCosts = step.id === 'record-costs' && refuelData.fuelingType === 'internal' && !isCompleted;
+          
+          if (shouldSkipTripTicket || shouldSkipRecordCosts) {
             return null;
           }
 
