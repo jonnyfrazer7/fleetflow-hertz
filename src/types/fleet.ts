@@ -31,6 +31,7 @@ export type WorkflowStage =
   | 'LOCATION_MOVE';
 
 export type WorkflowStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+export type WorkflowPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
 export type UserRole = 'CAR_CLEANER' | 'OPERATIONS_USER' | 'MANAGER';
 
@@ -42,7 +43,7 @@ export interface Workflow {
   assignedUserGroup: UserRole;
   startTime?: string;
   endTime?: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority: WorkflowPriority;
   notes?: string;
   estimatedDuration: number; // minutes
   actualDuration?: number; // minutes

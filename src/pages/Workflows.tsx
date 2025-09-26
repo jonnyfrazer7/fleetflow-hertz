@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NewWorkflowDialog } from '@/components/workflows/new-workflow-dialog';
 import { 
   ClipboardList,
   Plus,
@@ -137,10 +138,7 @@ export default function Workflows() {
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button className="bg-hertz-yellow text-hertz-navy hover:bg-hertz-gold">
-              <Plus className="w-4 h-4 mr-2" />
-              New Workflow
-            </Button>
+            <NewWorkflowDialog />
           </div>
         </div>
 

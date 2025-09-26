@@ -19,6 +19,23 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        
+        // Hertz Brand Colors
+        "hertz-yellow": "hsl(var(--hertz-yellow))",
+        "hertz-gold": "hsl(var(--hertz-gold))",
+        "hertz-navy": "hsl(var(--hertz-navy))",
+        "hertz-light-blue": "hsl(var(--hertz-light-blue))",
+        
+        // Status Colors
+        "status-completed": "hsl(var(--status-completed))",
+        "status-progress": "hsl(var(--status-progress))", 
+        "status-pending": "hsl(var(--status-pending))",
+        "status-warning": "hsl(var(--status-warning))",
+        "status-error": "hsl(var(--status-error))",
+        
+        // Dashboard
+        "dashboard-bg": "hsl(var(--dashboard-bg))",
+        
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
