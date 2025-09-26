@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/layout/navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +14,24 @@ import { toast } from '@/hooks/use-toast';
 
 export default function WorkflowExecute() {
   const { stage, workflowId } = useParams<{ stage: string; workflowId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { data: workflows = [], isLoading: workflowsLoading } = useWorkflows();
   const { data: vehicles = [], isLoading: vehiclesLoading } = useVehicles();
+
+  // Handle new workflow from rental return
+  const vehicleVin = searchParams.get('vehicleVin');
+  const returnDataParam = searchParams.get('returnData');
+  const isNewWorkflow = workflowId === 'new';
+  
+  let rentalReturnData = null;
+  if (returnDataParam) {
+    try {
+      rentalReturnData = JSON.parse(decodeURIComponent(returnDataParam));
+    } catch (e) {
+      console.error('Failed to parse return data:', e);
+    }
+  }
 
   if (!workflowId || !stage) {
     return (
@@ -45,10 +60,14 @@ export default function WorkflowExecute() {
     );
   }
 
-  const workflow = workflows.find(w => w.id === workflowId);
-  const vehicle = workflow ? vehicles.find(v => v.vin === workflow.vehicleVin) : null;
+  const workflow = workflowId !== 'new' ? workflows.find(w => w.id === workflowId) : null;
+  
+  // For new workflows, find vehicle by VIN from URL params
+  const vehicle = isNewWorkflow ? 
+    vehicles.find(v => v.vin === vehicleVin) : 
+    (workflow ? vehicles.find(v => v.vin === workflow.vehicleVin) : null);
 
-  if (!workflow || !vehicle) {
+  if ((!workflow && !isNewWorkflow) || !vehicle) {
     return (
       <div className="min-h-screen bg-dashboard-bg">
         <Navbar />
@@ -131,7 +150,10 @@ export default function WorkflowExecute() {
                 {stage.charAt(0).toUpperCase() + stage.slice(1).toLowerCase()} Workflow
               </h1>
               <p className="text-muted-foreground">
-                Work Order: WO-{workflow.id.substring(0, 8)}
+                {isNewWorkflow 
+                  ? `Rental Return - ${rentalReturnData?.rentalAgreementNumber || 'New Workflow'}` 
+                  : `Work Order: WO-${workflow.id.substring(0, 8)}`
+                }
               </p>
             </div>
           </div>
@@ -154,30 +176,59 @@ export default function WorkflowExecute() {
                 <p className="text-xs text-muted-foreground">{vehicle.year} • {vehicle.color}</p>
               </div>
               
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Priority</p>
-                <Badge className={getPriorityColor(workflow.priority)}>
-                  {workflow.priority}
-                </Badge>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Estimated Duration</p>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{workflow.estimatedDuration} minutes</span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Created</p>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">
-                    {new Date(workflow.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
+              {!isNewWorkflow && workflow && (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Priority</p>
+                    <Badge className={getPriorityColor(workflow.priority)}>
+                      {workflow.priority}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Estimated Duration</p>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{workflow.estimatedDuration} minutes</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Created</p>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm">
+                        {new Date(workflow.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isNewWorkflow && rentalReturnData && (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Rental Agreement</p>
+                    <p className="font-mono text-sm">{rentalReturnData.rentalAgreementNumber}</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Current Mileage</p>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{rentalReturnData.mileage} miles</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Assigned User</p>
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">{rentalReturnData.assignedUserName}</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -185,7 +236,7 @@ export default function WorkflowExecute() {
         {/* Workflow Steps */}
         {stage?.toUpperCase() === 'CLEANING' && (
           <CleaningSteps
-            workflowId={workflow.id}
+            workflowId={isNewWorkflow ? 'new' : workflow.id}
             vehicleVin={vehicle.vin}
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
@@ -198,7 +249,7 @@ export default function WorkflowExecute() {
         
         {stage?.toUpperCase() === 'REFUEL' && (
           <RefuelSteps
-            workflowId={workflow.id}
+            workflowId={isNewWorkflow ? 'new' : workflow.id}
             vehicleVin={vehicle.vin}
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
@@ -208,7 +259,7 @@ export default function WorkflowExecute() {
         
         {stage?.toUpperCase() === 'KEY_HANDLING' && (
           <KeyHandlingSteps
-            workflowId={workflow.id}
+            workflowId={isNewWorkflow ? 'new' : workflow.id}
             vehicleVin={vehicle.vin}
             vehicle={vehicle}
             onStepComplete={handleStepComplete}

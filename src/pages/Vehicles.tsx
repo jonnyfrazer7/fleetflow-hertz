@@ -11,7 +11,8 @@ import {
   Filter,
   Plus,
   Download,
-  Car
+  Car,
+  RotateCcw
 } from 'lucide-react';
 
 const mockVehicles = [
@@ -91,6 +92,13 @@ export default function Vehicles() {
             <Button variant="outline" className="hover:bg-hertz-yellow hover:text-hertz-navy">
               <Download className="w-4 h-4 mr-2" />
               Export
+            </Button>
+            <Button 
+              variant="outline"
+              className="hover:bg-workflow-step-active hover:text-white"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Initiate Rental Return
             </Button>
             <Button className="bg-hertz-yellow text-hertz-navy hover:bg-hertz-gold">
               <Plus className="w-4 h-4 mr-2" />

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { WorkflowList } from '@/components/workflows/workflow-list';
+import { RentalReturnDialog } from '@/components/vehicles/rental-return-dialog';
 import { 
   ArrowLeft,
   Car,
@@ -16,7 +17,8 @@ import {
   Hash,
   FileText,
   Clock,
-  Edit
+  Edit,
+  RotateCcw
 } from 'lucide-react';
 import type { Vehicle, Workflow } from '@/types/fleet';
 
@@ -77,6 +79,7 @@ const mockWorkflows: Workflow[] = [
 
 export default function VehicleDetail() {
   const { vin } = useParams<{ vin: string }>();
+  const [rentalReturnOpen, setRentalReturnOpen] = useState(false);
 
   const getStatusVariant = (status: Vehicle['operationStatus']) => {
     switch (status) {
@@ -128,6 +131,14 @@ export default function VehicleDetail() {
             >
               {mockVehicle.operationStatus}
             </Badge>
+            <Button 
+              variant="outline"
+              onClick={() => setRentalReturnOpen(true)}
+              className="hover:bg-workflow-step-active hover:text-white"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Initiate Rental Return
+            </Button>
             <Button className="bg-hertz-yellow text-hertz-navy hover:bg-hertz-gold">
               <Edit className="w-4 h-4 mr-2" />
               Edit Vehicle
@@ -284,6 +295,13 @@ export default function VehicleDetail() {
             <WorkflowList workflows={mockWorkflows} showVehicleInfo={false} />
           </div>
         </div>
+
+        {/* Rental Return Dialog */}
+        <RentalReturnDialog
+          open={rentalReturnOpen}
+          onOpenChange={setRentalReturnOpen}
+          vehicle={mockVehicle}
+        />
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -11,7 +11,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, Car, Calendar, MapPin } from 'lucide-react';
+import { RentalReturnDialog } from './rental-return-dialog';
+import { Eye, Car, Calendar, MapPin, RotateCcw } from 'lucide-react';
 import { type Vehicle } from '@/types/fleet';
 
 interface VehicleTableProps {
@@ -19,6 +20,13 @@ interface VehicleTableProps {
 }
 
 export function VehicleTable({ vehicles }: VehicleTableProps) {
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [rentalReturnOpen, setRentalReturnOpen] = useState(false);
+
+  const handleInitiateReturn = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setRentalReturnOpen(true);
+  };
   const getStatusVariant = (status: Vehicle['operationStatus']) => {
     switch (status) {
       case 'ACTIVE': return 'active';
@@ -48,7 +56,7 @@ export function VehicleTable({ vehicles }: VehicleTableProps) {
                 <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="w-[140px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -88,22 +96,41 @@ export function VehicleTable({ vehicles }: VehicleTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      asChild
-                      className="hover:bg-hertz-yellow hover:text-hertz-navy"
-                    >
-                      <Link to={`/vehicles/${vehicle.vin}`}>
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        asChild
+                        className="hover:bg-hertz-yellow hover:text-hertz-navy"
+                      >
+                        <Link to={`/vehicles/${vehicle.vin}`}>
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleInitiateReturn(vehicle)}
+                        className="hover:bg-workflow-step-active hover:text-white"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+
+        {/* Rental Return Dialog */}
+        {selectedVehicle && (
+          <RentalReturnDialog
+            open={rentalReturnOpen}
+            onOpenChange={setRentalReturnOpen}
+            vehicle={selectedVehicle}
+          />
+        )}
       </CardContent>
     </Card>
   );
