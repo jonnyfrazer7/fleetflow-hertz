@@ -30,6 +30,7 @@ export function useVehicles() {
         operationStatus: vehicle.operation_status as Vehicle['operationStatus'],
         lastMileage: vehicle.last_mileage || undefined,
         modelDescription: vehicle.model_description || undefined,
+        fuelType: vehicle.fuel_type as Vehicle['fuelType'],
         createdAt: vehicle.created_at,
         updatedAt: vehicle.updated_at
       })) as Vehicle[];
@@ -67,6 +68,7 @@ export function useVehicle(vin: string) {
         operationStatus: data.operation_status as Vehicle['operationStatus'],
         lastMileage: data.last_mileage || undefined,
         modelDescription: data.model_description || undefined,
+        fuelType: data.fuel_type as Vehicle['fuelType'],
         createdAt: data.created_at,
         updatedAt: data.updated_at
       } as Vehicle;
