@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Sparkles, Wrench, Fuel, Zap, MapPin } from 'lucide-react';
 import { CleaningWorkOrderTable } from '@/components/workflows/cleaning-work-order-table';
 import { RefuelWorkOrderTable } from '@/components/workflows/refuel-work-order-table';
+import { KeyHandlingWorkOrderTable } from '@/components/workflows/key-handling-work-order-table';
 import { useWorkflows } from '@/hooks/use-workflows';
 import { useVehicles } from '@/hooks/use-vehicles';
 import type { WorkflowStage } from '@/types/fleet';
@@ -140,6 +141,10 @@ export default function WorkflowStagePage() {
         
         {stageName === 'REFUEL' && (
           <RefuelWorkOrderTable workflows={stageWorkflows} vehicles={vehicles} />
+        )}
+        
+        {stageName === 'KEY_HANDLING' && (
+          <KeyHandlingWorkOrderTable workflows={stageWorkflows} vehicles={vehicles} />
         )}
       </main>
     </div>

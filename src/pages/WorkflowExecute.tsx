@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Car, Clock, Calendar, User } from 'lucide-react';
 import { CleaningSteps } from '@/components/workflows/cleaning-steps';
 import { RefuelSteps } from '@/components/workflows/refuel-steps';
+import { KeyHandlingSteps } from '@/components/workflows/key-handling-steps';
 import { useWorkflows } from '@/hooks/use-workflows';
 import { useVehicles } from '@/hooks/use-vehicles';
 import { toast } from '@/hooks/use-toast';
@@ -90,7 +91,15 @@ export default function WorkflowExecute() {
   };
 
   const handleRefuelComplete = () => {
-    handleWorkflowComplete();
+    toast({
+      title: 'Refuel Workflow Complete',
+      description: 'Moving to Key Handling workflow next.',
+    });
+    
+    // Navigate to key handling workflow after a short delay
+    setTimeout(() => {
+      navigate('/workflows/key_handling');
+    }, 2000);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -194,6 +203,27 @@ export default function WorkflowExecute() {
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
             onWorkflowComplete={handleRefuelComplete}
+          />
+        )}
+        
+        {stage?.toUpperCase() === 'KEY_HANDLING' && (
+          <KeyHandlingSteps
+            workflowId={workflow.id}
+            vehicleVin={vehicle.vin}
+            vehicle={vehicle}
+            onStepComplete={handleStepComplete}
+            onWorkflowComplete={() => {
+              toast({
+                title: 'Turnaround Process Complete!',
+                description: 'Vehicle is now available for rent.',
+              });
+              setTimeout(() => {
+                navigate('/workflows');
+              }, 2000);
+            }}
+            onUserAssigned={(userId, userName) => {
+              console.log('User assigned:', userName);
+            }}
           />
         )}
       </main>
