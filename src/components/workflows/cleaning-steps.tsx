@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Vehicle } from '@/types/fleet';
+import { useCurrentUser } from '@/hooks/use-workforce-users';
 import { 
   MapPin, 
   Sparkles, 
@@ -16,7 +17,8 @@ import {
   CheckCircle,
   Clock,
   Fuel,
-  Car
+  Car,
+  User
 } from 'lucide-react';
 
 interface CleaningStep {
@@ -36,6 +38,7 @@ interface CleaningStepsProps {
   vehicle: Vehicle;
   onStepComplete: (stepId: string, notes?: string) => void;
   onWorkflowComplete: (nextAction: 'REFUEL' | 'RENTABLE') => void;
+  onUserAssigned?: (userId: string, userName: string) => void;
 }
 
 const initialSteps: CleaningStep[] = [
@@ -73,12 +76,22 @@ const initialSteps: CleaningStep[] = [
   }
 ];
 
-export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete, onWorkflowComplete }: CleaningStepsProps) {
+export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete, onWorkflowComplete, onUserAssigned }: CleaningStepsProps) {
   const [steps, setSteps] = useState<CleaningStep[]>(initialSteps);
   const [currentStep, setCurrentStep] = useState(0);
   const [stepNotes, setStepNotes] = useState('');
   const [isProcessingStep, setIsProcessingStep] = useState(false);
   const [showNextActionDialog, setShowNextActionDialog] = useState(false);
+  const [assignedUser, setAssignedUser] = useState<string>('');
+  const { data: currentUser } = useCurrentUser();
+
+  // Auto-assign current user when starting workflow
+  React.useEffect(() => {
+    if (currentUser && !assignedUser) {
+      setAssignedUser(currentUser.name);
+      onUserAssigned?.(currentUser.id, currentUser.name);
+    }
+  }, [currentUser, assignedUser, onUserAssigned]);
 
   const completedSteps = steps.filter(step => step.completed).length;
   const totalSteps = steps.length;
@@ -202,6 +215,14 @@ export function CleaningSteps({ workflowId, vehicleVin, vehicle, onStepComplete,
               {completedSteps} of {totalSteps} complete
             </Badge>
           </div>
+          
+          {assignedUser && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <User className="w-4 h-4" />
+              <span>Assigned to: {assignedUser}</span>
+            </div>
+          )}
+          
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Progress</span>

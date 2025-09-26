@@ -42,12 +42,14 @@ export interface Workflow {
   stage: WorkflowStage;
   status: WorkflowStatus;
   assignedUserGroup: UserRole;
+  assignedWorkforceUserId?: string;
   startTime?: string;
   endTime?: string;
   priority: WorkflowPriority;
   notes?: string;
   estimatedDuration: number; // minutes
   actualDuration?: number; // minutes
+  assignedUserId?: string;
   createdAt: string;
   updatedAt: string;
 }

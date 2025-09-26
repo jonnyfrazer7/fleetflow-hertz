@@ -181,6 +181,9 @@ export default function WorkflowExecute() {
             vehicle={vehicle}
             onStepComplete={handleStepComplete}
             onWorkflowComplete={handleWorkflowComplete}
+            onUserAssigned={(userId, userName) => {
+              console.log('User assigned:', userName);
+            }}
           />
         )}
         

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      locations: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -139,6 +166,7 @@ export type Database = {
           actual_duration: number | null
           assigned_user_group: string
           assigned_user_id: string | null
+          assigned_workforce_user_id: string | null
           created_at: string
           end_time: string | null
           estimated_duration: number
@@ -155,6 +183,7 @@ export type Database = {
           actual_duration?: number | null
           assigned_user_group: string
           assigned_user_id?: string | null
+          assigned_workforce_user_id?: string | null
           created_at?: string
           end_time?: string | null
           estimated_duration?: number
@@ -171,6 +200,7 @@ export type Database = {
           actual_duration?: number | null
           assigned_user_group?: string
           assigned_user_id?: string | null
+          assigned_workforce_user_id?: string | null
           created_at?: string
           end_time?: string | null
           estimated_duration?: number
@@ -185,6 +215,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "workflows_assigned_workforce_user_id_fkey"
+            columns: ["assigned_workforce_user_id"]
+            isOneToOne: false
+            referencedRelation: "workforce_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workflows_vehicle_vin_fkey"
             columns: ["vehicle_vin"]
             isOneToOne: false
@@ -192,6 +229,42 @@ export type Database = {
             referencedColumns: ["vin"]
           },
         ]
+      }
+      workforce_users: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_current_user: boolean | null
+          location_code: string | null
+          name: string
+          phone: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_current_user?: boolean | null
+          location_code?: string | null
+          name: string
+          phone?: string | null
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_current_user?: boolean | null
+          location_code?: string | null
+          name?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
