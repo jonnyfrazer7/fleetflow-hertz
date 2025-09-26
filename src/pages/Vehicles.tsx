@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useVehicles } from '@/hooks/use-vehicles';
 import { 
   Search,
   Filter,
@@ -57,6 +58,19 @@ const mockVehicles = [
 ];
 
 export default function Vehicles() {
+  const { data: vehicles = [], isLoading } = useVehicles();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dashboard-bg">
+        <Navbar />
+        <main className="container mx-auto px-4 py-6 space-y-6">
+          <div className="text-center">Loading vehicles...</div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-dashboard-bg">
       <Navbar />
@@ -108,11 +122,11 @@ export default function Vehicles() {
               <div className="flex gap-2">
                 <Badge variant="secondary" className="bg-status-completed text-white">
                   <Car className="w-3 h-3 mr-1" />
-                  Active: {mockVehicles.filter(v => v.operationStatus === 'ACTIVE').length}
+                  Active: {vehicles.filter(v => v.operationStatus === 'ACTIVE').length}
                 </Badge>
                 <Badge variant="secondary" className="bg-status-warning text-white">
                   <Car className="w-3 h-3 mr-1" />
-                  Maintenance: {mockVehicles.filter(v => v.operationStatus === 'MAINTENANCE').length}
+                  Maintenance: {vehicles.filter(v => v.operationStatus === 'MAINTENANCE').length}
                 </Badge>
               </div>
             </div>
@@ -120,7 +134,7 @@ export default function Vehicles() {
         </Card>
 
         {/* Vehicle Table */}
-        <VehicleTable vehicles={mockVehicles} />
+        <VehicleTable vehicles={vehicles} />
       </main>
     </div>
   );
