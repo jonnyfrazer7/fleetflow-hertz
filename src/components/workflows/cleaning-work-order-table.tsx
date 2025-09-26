@@ -12,13 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Clock, CheckCircle, Car, MapPin, Calendar } from 'lucide-react';
-import type { Workflow } from '@/types/fleet';
+import type { Workflow, Vehicle } from '@/types/fleet';
 
 interface CleaningWorkOrderTableProps {
   workflows: Workflow[];
+  vehicles: Vehicle[];
 }
 
-export function CleaningWorkOrderTable({ workflows }: CleaningWorkOrderTableProps) {
+export function CleaningWorkOrderTable({ workflows, vehicles }: CleaningWorkOrderTableProps) {
   const getStatusIcon = (status: Workflow['status']) => {
     switch (status) {
       case 'PENDING': return Clock;

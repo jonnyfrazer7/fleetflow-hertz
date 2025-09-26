@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Sparkles, Wrench, Fuel, Zap, MapPin } from 'lucide-react';
 import { CleaningWorkOrderTable } from '@/components/workflows/cleaning-work-order-table';
+import { RefuelWorkOrderTable } from '@/components/workflows/refuel-work-order-table';
 import { useWorkflows } from '@/hooks/use-workflows';
+import { useVehicles } from '@/hooks/use-vehicles';
 import type { WorkflowStage } from '@/types/fleet';
 
 const stageConfig = {
@@ -20,6 +22,7 @@ const stageConfig = {
 export default function WorkflowStagePage() {
   const { stage } = useParams<{ stage: string }>();
   const { data: workflows = [], isLoading } = useWorkflows();
+  const { data: vehicles = [], isLoading: vehiclesLoading } = useVehicles();
 
   if (!stage || !(stage.toUpperCase() in stageConfig)) {
     return (
@@ -41,7 +44,7 @@ export default function WorkflowStagePage() {
   const config = stageConfig[stageName];
   const Icon = config.icon;
 
-  if (isLoading) {
+  if (isLoading || vehiclesLoading) {
     return (
       <div className="min-h-screen bg-dashboard-bg">
         <Navbar />
@@ -131,7 +134,13 @@ export default function WorkflowStagePage() {
         </div>
 
         {/* Work Orders for this stage */}
-        <CleaningWorkOrderTable workflows={stageWorkflows} />
+        {stageName === 'CLEANING' && (
+          <CleaningWorkOrderTable workflows={stageWorkflows} vehicles={vehicles} />
+        )}
+        
+        {stageName === 'REFUEL' && (
+          <RefuelWorkOrderTable workflows={stageWorkflows} vehicles={vehicles} />
+        )}
       </main>
     </div>
   );

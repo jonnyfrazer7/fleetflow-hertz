@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Car, Clock, Calendar, User } from 'lucide-react';
 import { CleaningSteps } from '@/components/workflows/cleaning-steps';
+import { RefuelSteps } from '@/components/workflows/refuel-steps';
 import { useWorkflows } from '@/hooks/use-workflows';
 import { useVehicles } from '@/hooks/use-vehicles';
 import { toast } from '@/hooks/use-toast';
@@ -69,16 +70,27 @@ export default function WorkflowExecute() {
     });
   };
 
-  const handleWorkflowComplete = (nextAction: 'REFUEL' | 'RENTABLE') => {
-    toast({
-      title: 'Cleaning Workflow Complete',
-      description: `Vehicle will be moved to ${nextAction === 'REFUEL' ? 'refuel queue' : 'rentable inventory'}.`,
-    });
+  const handleWorkflowComplete = (nextAction?: 'REFUEL' | 'RENTABLE') => {
+    if (nextAction) {
+      toast({
+        title: 'Cleaning Workflow Complete',
+        description: `Vehicle will be moved to ${nextAction === 'REFUEL' ? 'refuel queue' : 'rentable inventory'}.`,
+      });
+    } else {
+      toast({
+        title: 'Refuel Workflow Complete',
+        description: 'Vehicle has been refueled and is ready for the next stage.',
+      });
+    }
     
     // Navigate back to workflows after a short delay
     setTimeout(() => {
       navigate('/workflows');
     }, 2000);
+  };
+
+  const handleRefuelComplete = () => {
+    handleWorkflowComplete();
   };
 
   const getPriorityColor = (priority: string) => {
@@ -107,7 +119,7 @@ export default function WorkflowExecute() {
             </Link>
             <div>
               <h1 className="text-3xl font-heading font-bold text-foreground">
-                Cleaning Workflow
+                {stage.charAt(0).toUpperCase() + stage.slice(1).toLowerCase()} Workflow
               </h1>
               <p className="text-muted-foreground">
                 Work Order: WO-{workflow.id.substring(0, 8)}
@@ -162,13 +174,25 @@ export default function WorkflowExecute() {
         </Card>
 
         {/* Workflow Steps */}
-        <CleaningSteps
-          workflowId={workflow.id}
-          vehicleVin={vehicle.vin}
-          vehicle={vehicle}
-          onStepComplete={handleStepComplete}
-          onWorkflowComplete={handleWorkflowComplete}
-        />
+        {stage?.toUpperCase() === 'CLEANING' && (
+          <CleaningSteps
+            workflowId={workflow.id}
+            vehicleVin={vehicle.vin}
+            vehicle={vehicle}
+            onStepComplete={handleStepComplete}
+            onWorkflowComplete={handleWorkflowComplete}
+          />
+        )}
+        
+        {stage?.toUpperCase() === 'REFUEL' && (
+          <RefuelSteps
+            workflowId={workflow.id}
+            vehicleVin={vehicle.vin}
+            vehicle={vehicle}
+            onStepComplete={handleStepComplete}
+            onWorkflowComplete={handleRefuelComplete}
+          />
+        )}
       </main>
     </div>
   );
