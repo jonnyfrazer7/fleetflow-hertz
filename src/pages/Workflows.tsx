@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/navbar';
 import { WorkflowList } from '@/components/workflows/workflow-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -159,25 +160,27 @@ export default function Workflows() {
         {/* Stage Overview */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {getStageStats().map((stage) => (
-            <Card key={stage.stage} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <div className={`w-3 h-3 rounded-full ${stage.color}`} />
-                  {stage.label}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stage.total}</div>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="secondary" className="bg-status-pending text-white text-xs">
-                    {stage.pending} pending
-                  </Badge>
-                  <Badge variant="secondary" className="bg-status-progress text-white text-xs">
-                    {stage.inProgress} active
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={stage.stage} to={`/workflows/${stage.stage.toLowerCase()}`}>
+              <Card className="hover:shadow-lg transition-all cursor-pointer hover:scale-105">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <div className={`w-3 h-3 rounded-full ${stage.color}`} />
+                    {stage.label}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stage.total}</div>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="secondary" className="bg-status-pending text-white text-xs">
+                      {stage.pending} pending
+                    </Badge>
+                    <Badge variant="secondary" className="bg-status-progress text-white text-xs">
+                      {stage.inProgress} active
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
