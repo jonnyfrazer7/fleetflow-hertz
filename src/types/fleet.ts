@@ -15,7 +15,7 @@ export interface Vehicle {
   modelCode: string;
   holdFlag: boolean;
   holdDate?: string;
-  operationStatus: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'HOLD';
+  operationStatus: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'HOLD' | 'TURNAROUND';
   lastMileage: number;
   modelDescription: string;
   statusChangeReason?: string;

@@ -9,7 +9,7 @@ export interface WorkflowUpdateData {
 }
 
 export interface VehicleStatusUpdate {
-  operationStatus: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'HOLD';
+  operationStatus: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'HOLD' | 'TURNAROUND';
   lastMileage?: number;
 }
 
@@ -132,9 +132,9 @@ export function useWorkflowUpdates() {
 
       // Update vehicle status based on completion
       if (nextStage) {
-        // More workflows to go - keep in maintenance/turnaround
+        // More workflows to go - keep in turnaround status
         await updateVehicleStatus(vehicleVin, {
-          operationStatus: 'MAINTENANCE',
+          operationStatus: 'TURNAROUND',
           lastMileage: currentMileage
         });
 
