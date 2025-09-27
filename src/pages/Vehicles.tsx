@@ -134,6 +134,10 @@ export default function Vehicles() {
                 </Badge>
                 <Badge variant="secondary" className="bg-status-warning text-white">
                   <Car className="w-3 h-3 mr-1" />
+                  Turnaround: {vehicles.filter(v => v.operationStatus === 'TURNAROUND').length}
+                </Badge>
+                <Badge variant="secondary" className="bg-status-pending text-white">
+                  <Car className="w-3 h-3 mr-1" />
                   Maintenance: {vehicles.filter(v => v.operationStatus === 'MAINTENANCE').length}
                 </Badge>
               </div>
