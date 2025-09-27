@@ -9,7 +9,7 @@ export interface Vehicle {
   color: string;
   installationDate: string;
   owningCountry: string;
-  locationCountry: string;
+  locationId: string; // Reference to locations table
   licensePlate: string;
   ownAreaUnitNo: string;
   modelCode: string;
