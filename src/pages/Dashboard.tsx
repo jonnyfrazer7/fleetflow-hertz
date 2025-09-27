@@ -141,7 +141,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="flex items-center gap-1 bg-status-completed text-white">
+            <Badge className="flex items-center gap-1 bg-status-completed text-white hover:bg-status-completed border-transparent">
               <MapPin className="w-3 h-3" />
               LAX Active
             </Badge>
