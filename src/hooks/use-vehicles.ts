@@ -8,7 +8,10 @@ export function useVehicles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vehicles')
-        .select('*')
+        .select(`
+          *,
+          locations(id, name, address, type)
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -22,7 +25,7 @@ export function useVehicles() {
         color: vehicle.color,
         installationDate: vehicle.installation_date,
         owningCountry: vehicle.owning_country,
-        locationCountry: vehicle.location_country,
+        locationId: vehicle.location_id,
         licensePlate: vehicle.license_plate || undefined,
         ownAreaUnitNo: vehicle.own_area_unit_no || undefined,
         modelCode: vehicle.model_code || undefined,
@@ -32,7 +35,13 @@ export function useVehicles() {
         modelDescription: vehicle.model_description || undefined,
         fuelType: vehicle.fuel_type as Vehicle['fuelType'],
         createdAt: vehicle.created_at,
-        updatedAt: vehicle.updated_at
+        updatedAt: vehicle.updated_at,
+        location: vehicle.locations ? {
+          id: vehicle.locations.id,
+          name: vehicle.locations.name,
+          address: vehicle.locations.address,
+          type: vehicle.locations.type
+        } : undefined
       })) as Vehicle[];
     },
   });
@@ -44,7 +53,10 @@ export function useVehicle(vin: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vehicles')
-        .select('*')
+        .select(`
+          *,
+          locations(id, name, address, type)
+        `)
         .eq('vin', vin)
         .maybeSingle();
       
@@ -60,7 +72,7 @@ export function useVehicle(vin: string) {
         color: data.color,
         installationDate: data.installation_date,
         owningCountry: data.owning_country,
-        locationCountry: data.location_country,
+        locationId: data.location_id,
         licensePlate: data.license_plate || undefined,
         ownAreaUnitNo: data.own_area_unit_no || undefined,
         modelCode: data.model_code || undefined,
@@ -70,7 +82,13 @@ export function useVehicle(vin: string) {
         modelDescription: data.model_description || undefined,
         fuelType: data.fuel_type as Vehicle['fuelType'],
         createdAt: data.created_at,
-        updatedAt: data.updated_at
+        updatedAt: data.updated_at,
+        location: data.locations ? {
+          id: data.locations.id,
+          name: data.locations.name,
+          address: data.locations.address,
+          type: data.locations.type
+        } : undefined
       } as Vehicle;
     },
     enabled: !!vin,

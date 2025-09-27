@@ -32,7 +32,7 @@ const mockVehicle: Vehicle = {
   color: 'Silver',
   installationDate: '2023-01-15',
   owningCountry: 'USA',
-  locationCountry: 'USA',
+  locationId: '1',
   licensePlate: 'ABC-1234',
   ownAreaUnitNo: 'LAX001',
   modelCode: 'CIV23',
@@ -43,7 +43,13 @@ const mockVehicle: Vehicle = {
   statusChangeReason: 'Routine maintenance completed',
   fuelType: 'PETROL',
   createdAt: '2023-01-15T10:00:00Z',
-  updatedAt: '2024-01-20T14:30:00Z'
+  updatedAt: '2024-01-20T14:30:00Z',
+  location: {
+    id: '1',
+    name: 'Los Angeles LAX Terminal',
+    address: '1 World Way, Los Angeles, CA 90045',
+    type: 'rental'
+  }
 };
 
 const mockWorkflows: Workflow[] = [
@@ -240,8 +246,15 @@ export default function VehicleDetail() {
                     <p className="font-semibold">{mockVehicle.owningCountry}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Location Country</label>
-                    <p className="font-semibold">{mockVehicle.locationCountry}</p>
+                    <label className="text-sm font-medium text-muted-foreground">Current Location</label>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">
+                        {mockVehicle.location?.name || 'Unknown Location'}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {mockVehicle.location?.address}
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-1">

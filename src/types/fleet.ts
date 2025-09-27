@@ -22,6 +22,12 @@ export interface Vehicle {
   fuelType: 'PETROL' | 'DIESEL' | 'HYBRID' | 'EV';
   createdAt: string;
   updatedAt: string;
+  location?: {
+    id: string;
+    name: string;
+    address: string;
+    type: string;
+  };
 }
 
 export type WorkflowStage = 

@@ -106,6 +106,7 @@ export type Database = {
           last_mileage: number | null
           license_plate: string | null
           location_country: string
+          location_id: string | null
           make: string
           model_code: string | null
           model_description: string | null
@@ -127,6 +128,7 @@ export type Database = {
           last_mileage?: number | null
           license_plate?: string | null
           location_country: string
+          location_id?: string | null
           make: string
           model_code?: string | null
           model_description?: string | null
@@ -148,6 +150,7 @@ export type Database = {
           last_mileage?: number | null
           license_plate?: string | null
           location_country?: string
+          location_id?: string | null
           make?: string
           model_code?: string | null
           model_description?: string | null
@@ -159,7 +162,15 @@ export type Database = {
           vin?: string
           year?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_vehicles_location"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflows: {
         Row: {

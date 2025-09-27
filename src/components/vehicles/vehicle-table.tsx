@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RentalReturnDialog } from './rental-return-dialog';
 import { Eye, Car, Calendar, MapPin, RotateCcw } from 'lucide-react';
 import { type Vehicle } from '@/types/fleet';
-import { useLocations } from '@/hooks/use-locations';
 
 interface VehicleTableProps {
   vehicles: Vehicle[];
@@ -23,16 +22,10 @@ interface VehicleTableProps {
 export function VehicleTable({ vehicles }: VehicleTableProps) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [rentalReturnOpen, setRentalReturnOpen] = useState(false);
-  const { data: locations = [] } = useLocations();
 
   const handleInitiateReturn = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
     setRentalReturnOpen(true);
-  };
-
-  const getLocationName = (locationId: string) => {
-    const location = locations.find(loc => loc.id === locationId);
-    return location?.name || 'Unknown Location';
   };
   const getStatusVariant = (status: Vehicle['operationStatus']) => {
     switch (status) {
@@ -88,7 +81,14 @@ export function VehicleTable({ vehicles }: VehicleTableProps) {
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm">
                       <MapPin className="w-3 h-3" />
-                      {getLocationName(vehicle.locationId)}
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {vehicle.location?.name || 'Unknown Location'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {vehicle.location?.address}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
